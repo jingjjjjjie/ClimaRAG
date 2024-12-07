@@ -42,7 +42,7 @@ class RedPillLLM(LLM):
             "temperature": self.temperature
         }
 
-        print("Sending request to RedPill API in LLM:", payload)
+        print("\n\nSending request to RedPill API in LLM:", payload)
 
         # Send the request
         response = requests.post(url, headers=headers, data=json.dumps(payload))
@@ -55,7 +55,7 @@ class RedPillLLM(LLM):
         response_data = response.json()
         generated_text = response_data.get("choices", [{}])[0].get("message", {}).get("content", "")
 
-        print("Received response from RedPill API in LLM:", generated_text)
+        print("\n\nReceived response from RedPill API in LLM:", generated_text)
 
         return generated_text
 

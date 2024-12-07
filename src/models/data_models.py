@@ -8,6 +8,10 @@ class RouteQuery(BaseModel):
         ...,
         description="Abstract_Store is a database with abstracts of papers in the natural language field, Content_Store is a database with the full text of papers in the natural language field. Given a user question choose which datasource would be most relevant for answering their question. For Summarization or more general use cases, route to Abstract_Store, only if asked on concepts or specific content route to Content_Store. Otherwise, if you encounter something wierd or not in the field of nlp, return OTHER",
     )
+    messages: str = Field(
+        ...,
+        description="The conversation history with the user in the format received from the API"
+    )
 
 # Metadata field information for retrievers
 METADATA_FIELD_INFO = [

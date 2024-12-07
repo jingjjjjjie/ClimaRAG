@@ -5,7 +5,8 @@ from langchain_chroma import Chroma
 from langchain_core.documents import Document
 from uuid import uuid4
 import os
-from config.settings import EMBEDDING_MODEL
+from ..config.settings import EMBEDDING_MODEL, PERSIST_DIRECTORY
+from ..utils.helpers import load_corpus
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 # Set up logging
@@ -13,7 +14,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 class DataProcessor:
-    def __init__(self, persist_directory="./chroma_db"):
+    def __init__(self, persist_directory=PERSIST_DIRECTORY):
         """Initialize the data processor with embedding model and storage paths"""
         logger.info(f"Initializing DataProcessor with persist directory: {persist_directory}")
         self.embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
@@ -111,7 +112,7 @@ class DataProcessor:
         logger.info(f"Vector store stats: {stats}")
         return stats
 
-def preprocess_and_store_data(data_path: str, persist_directory: str = "./chroma_db"):
+def preprocess_and_store_data(data_path: str, persist_directory: str = PERSIST_DIRECTORY):
     """
     Main function to preprocess and store data
     """
@@ -123,7 +124,6 @@ def preprocess_and_store_data(data_path: str, persist_directory: str = "./chroma
         abstract_store, content_store = processor.create_vector_stores()
         
         # Load corpus from file
-        from utils.helpers import load_corpus
         corpus = load_corpus(data_path)
         
         # Process and store documents

@@ -1,8 +1,8 @@
 import logging
-from config.settings import DATA_PATH
-from services.business_logic import RAGSystem
-from utils.helpers import display_results
-from services.data_processor import preprocess_and_store_data
+from .config.settings import DATA_PATH, PERSIST_DIRECTORY
+from .services.business_logic import RAGSystem
+from .utils.helpers import display_results
+from .services.data_processor import preprocess_and_store_data, DataProcessor
 import os
 
 # Set up logging
@@ -10,18 +10,14 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 def main():
-    # Set up data directory
-    persist_directory = "./chroma_db"
-    
     # Check if vector stores already exist
-    if not os.path.exists(persist_directory):
+    if not os.path.exists(PERSIST_DIRECTORY):
         logger.info("Vector stores not found. Processing data...")
-        abstract_store, content_store, stats = preprocess_and_store_data(DATA_PATH, persist_directory)
+        abstract_store, content_store, stats = preprocess_and_store_data(DATA_PATH, PERSIST_DIRECTORY)
         logger.info(f"Vector store statistics: {stats}")
     else:
         logger.info("Loading existing vector stores...")
-        from services.data_processor import DataProcessor
-        processor = DataProcessor(persist_directory)
+        processor = DataProcessor(PERSIST_DIRECTORY)
         abstract_store, content_store = processor.create_vector_stores()
         stats = processor.get_store_stats()
         logger.info(f"Loaded vector store statistics: {stats}")
@@ -39,7 +35,8 @@ def main():
     # Process queries
     for query in queries:
         result = rag_system.process_query(query)
-        display_results(result)
+        # display_results(result)
+        print(result)
         print('\n')
 
 if __name__ == "__main__":
