@@ -68,7 +68,10 @@ class RAGMemoryManager:
             # Return both the message for memory and the full result
             return {
                 "messages": [ai_message],
-                "_result": result  # Use a different key that won't be processed as a message
+                # only messages will actually be returned
+                # "type": result['type'],
+                # "docs": result['docs'] if 'docs' in result else [],
+                # "_result": result  # Use a different key that won't be processed as a message
             }
 
         # Define the workflow
@@ -95,17 +98,17 @@ class RAGMemoryManager:
                 config={"configurable": {"thread_id": "1"}}
             )
             logger.info("Successfully processed query with memory")
+
+            print("---result--- in process_query_with_memory")
+            print(result)
+
+            print("result['messages'][-1]")
+            print(result["messages"][-1])
             
             # Return the full result dictionary that includes type, docs, and response
-            if "_result" in result:
-                return result["_result"]
-            else:
-                # Fallback to create a response from the message content
-                return {
-                    'type': 'other',
-                    'docs': [],
-                    'response': result["messages"][0].content
-                }
+            return {
+                'answer': result["messages"][-1].content,
+            }
                 
         except Exception as e:
             logger.error(f"Error processing query with memory: {str(e)}")
