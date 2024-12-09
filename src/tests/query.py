@@ -1,0 +1,8 @@
+import requests
+
+response = requests.post(
+    "http://localhost:8000/api/v1/query",
+    # json={"text": "Tell me about the transformer architecture in detail"}
+    json={"text": "What did we talk about transformer architecture just now?"}
+)
+print(response.json())
