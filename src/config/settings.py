@@ -13,5 +13,6 @@ CHUNK_SIZE = 1500
 CHUNK_OVERLAP = 100
 
 # Data Settings
-DATA_PATH = './src/data/data_info.txt'
+# DATA_PATH = './src/data/data_info.txt'
+DATA_PATH = './src/data/output3.json'
 PERSIST_DIRECTORY = "./src/chroma_db" 
