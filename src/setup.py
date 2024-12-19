@@ -23,6 +23,8 @@ setup(
         "google-api-python-client",
         "typing-extensions",
         "lark",
+        "beautifulsoup4",
+        "html2text",
     ],
     classifiers=[
         "Development Status :: 3 - Alpha",
