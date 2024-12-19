@@ -54,26 +54,37 @@ class DataProcessor:
             chunk_overlap=100
         )
         
-        # Process abstracts
+        # Process both abstracts and content in one loop
         abstract_docs = []
+        content_docs = []
+        
         for thesis in corpus:
+            # Filter out the thesis with no full_text
+            if 'full_text' not in thesis:
+                continue
+
+            try:
+                year = int(thesis['Year'])
+            except (ValueError, TypeError):
+                # Skip this thesis if year conversion fails
+                continue
+
+            # Create abstract document
             abstract_doc = Document(
-                page_content=thesis['abstract'],
+                page_content=thesis['Abstract'],
                 metadata={
-                    "title": thesis['title'],
-                    "year": thesis['year']
+                    "title": thesis['Title'],
+                    "year": year
                 }
             )
             abstract_docs.append(abstract_doc)
-        
-        # Process content and split into chunks
-        content_docs = []
-        for thesis in corpus:
+
+            # Create content document
             content_doc = Document(
-                page_content=thesis['content'],
+                page_content=thesis['full_text'],
                 metadata={
-                    "title": thesis['title'],
-                    "year": thesis['year']
+                    "title": thesis['Title'],
+                    "year": year
                 }
             )
             content_docs.append(content_doc)
