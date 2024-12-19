@@ -1,3 +1,4 @@
+import os
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda
@@ -13,7 +14,19 @@ from ..config.prompt_settings import (
     DOCUMENT_CONTENT_DESCRIPTION
 )
 from .memory_manager import RAGMemoryManager
+# from langchain.retrievers.web_research import WebResearchRetriever
+from langchain_community.retrievers.web_research import WebResearchRetriever
+from langchain_community.vectorstores import Chroma
+from langchain_community.utilities import GoogleSearchAPIWrapper
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain.chains import RetrievalQAWithSourcesChain
+from dotenv import load_dotenv
 import logging
+import re
+
+# Set proxy environment variables
+os.environ['http_proxy'] = 'http://127.0.0.1:7890'
+os.environ['https_proxy'] = 'http://127.0.0.1:7890'
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -43,6 +56,9 @@ class RAGSystem:
         # Initialize memory manager
         logger.info("Initializing memory manager")
         self.memory_manager = RAGMemoryManager(self)
+        
+        # Initialize web research components
+        self.setup_web_research()
 
     def setup_components(self):
         logger.info("Setting up RAG components")
@@ -107,6 +123,33 @@ class RAGSystem:
         
         self.full_chain = router | RunnableLambda(self.choose_route)
 
+    def setup_web_research(self):
+        """Initialize web research components"""
+        logger.info("Setting up web research retriever")
+        try:
+            # Initialize Google Search
+            self.search = GoogleSearchAPIWrapper()
+            
+            # Initialize Web Research Retriever using existing components
+            self.web_research_retriever = WebResearchRetriever.from_llm(
+                vectorstore=self.content_store,  # Reuse existing Chroma store
+                llm=self.llm,
+                search=self.search,
+                allow_dangerous_requests=True
+            )
+            
+            # Initialize QA Chain for web research
+            self.web_qa_chain = RetrievalQAWithSourcesChain.from_chain_type(
+                self.llm, 
+                retriever=self.web_research_retriever
+            )
+            
+            logger.info("Web research components initialized successfully")
+            
+        except Exception as e:
+            logger.error(f"Error setting up web research: {str(e)}")
+            raise
+
     def choose_route(self, result):
         logger.info(f"Choosing route for result: {result}")
 
@@ -126,7 +169,53 @@ class RAGSystem:
             return {"context": self.content_retriever, "question": RunnableLambda(return_messages)} | prompt | self.llm | StrOutputParser()
             # return self.hyde_chain_content
         else:
-            return 'The answer that you are looking for is not here :)'
+            # Use web research for other queries
+            logger.info("Using web research retriever for query")
+            try:
+                logger.info(f"Result: {result}")
+                
+                # Get the last message content using regex
+                if result.messages:
+                    messages_str = str(result.messages)
+                    logger.info(f"Messages string: {messages_str}")
+                    
+                    # Extract content from the last message using regex
+                    # This pattern matches the last occurrence of content='...' before the final ]
+                    pattern = r".*content='([^']*)'[^]]*]$"
+                    match = re.search(pattern, messages_str)
+                    
+                    if match:
+                        question = match.group(1)
+                        logger.info(f"Extracted question: {question}")
+                    else:
+                        logger.warning("Could not extract content from messages")
+                        return "Could not process the question format."
+                else:
+                    logger.warning("No messages found in result")
+                    return "No question found to process."
+
+                logger.info(f"Question: {question}")
+                
+                # Get response from web research
+                web_result = self.web_qa_chain.invoke({
+                    "question": question
+                })
+
+                logger.info(f"Web result: {web_result}")
+                
+                # Format the response with sources
+                response = f"{web_result['answer']}\n\nSources:\n"
+
+                logger.info(f"Response: {response}")
+
+                for source in web_result.get('sources', []):
+                    response += f"- {source}\n"
+                
+                return response
+                
+            except Exception as e:
+                logger.error(f"Error in web research: {str(e)}")
+                return "I apologize, but I couldn't find a reliable answer to your question at this moment."
 
     # def format_message_history(self, messages):
     #     """Format message history into a readable string"""
