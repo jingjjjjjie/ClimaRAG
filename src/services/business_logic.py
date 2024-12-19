@@ -183,11 +183,10 @@ class RAGSystem:
                     
                     # Extract content from the last message using regex
                     # This pattern matches the last occurrence of content='...' before the final ]
-                    pattern = r".*content='([^']*)'[^]]*]$"
-                    match = re.search(pattern, messages_str)
+                    matches = re.findall(r"content='(.*?)'", messages_str)
                     
-                    if match:
-                        question = match.group(1)
+                    if matches:
+                        question = matches[-1]
                         logger.info(f"Extracted question: {question}")
                     else:
                         logger.warning("Could not extract content from messages")
