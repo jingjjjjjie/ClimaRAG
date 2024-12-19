@@ -8,7 +8,7 @@ RAG-Summarizer 是一个检索增强生成系统，能够根据用户的检索�
 
 ## 系统要求
 
-- Python >= 3.8 （当前的`requirements.txt`和`setup.py`已在Python 3.9上进行测试）
+- Python >= 3.8 （建议Python 3.9，当前的`requirements.txt`和`setup.py`已在Python 3.9上进行测试）
 
 ## 安装方法
 
