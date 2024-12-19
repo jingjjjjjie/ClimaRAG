@@ -1,12 +1,13 @@
 from typing import Literal
 from pydantic import BaseModel, Field
 from langchain.chains.query_constructor.schema import AttributeInfo
+from ..config.prompt_settings import ROUTING_DESCRIPTION
 
 class RouteQuery(BaseModel):
     """Route a user query to the most relevant datasource."""
     datasource: Literal["Abstract_Store", "Content_Store", "OTHER"] = Field(
         ...,
-        description="Abstract_Store is a database with abstracts of papers related to climate change or the environment, Content_Store is a database with the full text of papers related to climate change or the environment. Given a user question choose which datasource would be most relevant for answering their question. For Summarization or more general use cases, route to Abstract_Store, only if asked on concepts or specific content route to Content_Store. Otherwise, if you encounter something weird or not related to climate change or the environment, return OTHER",
+        description=ROUTING_DESCRIPTION,
     )
     messages: str = Field(
         ...,
@@ -31,5 +32,3 @@ METADATA_FIELD_INFO = [
         type="integer",
     ),
 ]
-
-DOCUMENT_CONTENT_DESCRIPTION = "Thesis in the natural language processing field" 
