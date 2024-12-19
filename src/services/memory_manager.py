@@ -1,8 +1,7 @@
 import logging
-import json
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import START, MessagesState, StateGraph
-from langchain_core.messages import SystemMessage, AIMessage
+from langchain_core.messages import AIMessage
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

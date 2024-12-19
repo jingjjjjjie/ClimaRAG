@@ -4,8 +4,8 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnableLambda
 from langchain.retrievers.self_query.base import SelfQueryRetriever
 from ..models.data_models import METADATA_FIELD_INFO, RouteQuery
-from ..tools.custom_chat_model import RedPillChatModel
-from ..tools.customllm import RedPillLLM
+from ..custom_classes.custom_chat_model import RedPillChatModel
+from ..custom_classes.customllm import RedPillLLM
 from ..config.settings import RED_PILL_API_KEY, LLM_MODEL
 from ..config.prompt_settings import (
     ROUTER_SYSTEM_PROMPT,
@@ -18,8 +18,8 @@ from langchain.chains.qa_with_sources.retrieval import RetrievalQAWithSourcesCha
 import logging
 import re
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from ..custom.search import FilteredGoogleSearchAPIWrapper
-from ..custom.retrievers import CustomWebResearchRetriever
+from ..custom_imported_classes.search import FilteredGoogleSearchAPIWrapper
+from ..custom_imported_classes.retrievers import CustomWebResearchRetriever
 
 # Set proxy environment variables
 os.environ['http_proxy'] = 'http://127.0.0.1:7890'
