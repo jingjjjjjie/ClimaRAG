@@ -1,11 +1,20 @@
 import os
+import logging
+import re
+
+from langchain.chains.qa_with_sources.retrieval import RetrievalQAWithSourcesChain
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnableLambda
 from langchain.retrievers.self_query.base import SelfQueryRetriever
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+
+from .memory_manager import RAGMemoryManager
 from ..models.data_models import METADATA_FIELD_INFO, RouteQuery
 from ..custom_classes.custom_chat_model import RedPillChatModel
 from ..custom_classes.customllm import RedPillLLM
+from ..custom_imported_classes.search import FilteredGoogleSearchAPIWrapper
+from ..custom_imported_classes.retrievers import CustomWebResearchRetriever
 from ..config.settings import RED_PILL_API_KEY, LLM_MODEL
 from ..config.prompt_settings import (
     ROUTER_SYSTEM_PROMPT,
@@ -13,17 +22,11 @@ from ..config.prompt_settings import (
     RAG_TEMPLATE,
     DOCUMENT_CONTENT_DESCRIPTION
 )
-from .memory_manager import RAGMemoryManager
-from langchain.chains.qa_with_sources.retrieval import RetrievalQAWithSourcesChain
-import logging
-import re
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from ..custom_imported_classes.search import FilteredGoogleSearchAPIWrapper
-from ..custom_imported_classes.retrievers import CustomWebResearchRetriever
 
-# Set proxy environment variables
-os.environ['http_proxy'] = 'http://127.0.0.1:7890'
-os.environ['https_proxy'] = 'http://127.0.0.1:7890'
+
+# Set proxy environment variables (for VPN)
+os.environ['http_proxy'] = os.getenv('HTTP_PROXY')
+os.environ['https_proxy'] = os.getenv('HTTPS_PROXY')
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
