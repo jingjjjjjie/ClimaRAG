@@ -6,7 +6,7 @@ class RouteQuery(BaseModel):
     """Route a user query to the most relevant datasource."""
     datasource: Literal["Abstract_Store", "Content_Store", "OTHER"] = Field(
         ...,
-        description="Abstract_Store is a database with abstracts of papers in the natural language field, Content_Store is a database with the full text of papers in the natural language field. Given a user question choose which datasource would be most relevant for answering their question. For Summarization or more general use cases, route to Abstract_Store, only if asked on concepts or specific content route to Content_Store. Otherwise, if you encounter something wierd or not in the field of nlp, return OTHER",
+        description="Abstract_Store is a database with abstracts of papers related to climate change or the environment, Content_Store is a database with the full text of papers related to climate change or the environment. Given a user question choose which datasource would be most relevant for answering their question. For Summarization or more general use cases, route to Abstract_Store, only if asked on concepts or specific content route to Content_Store. Otherwise, if you encounter something weird or not related to climate change or the environment, return OTHER",
     )
     messages: str = Field(
         ...,
