@@ -1,10 +1,7 @@
 import unittest
-import asyncio
 import logging
 from concurrent.futures import ThreadPoolExecutor
 from ..services.system_manager import SystemManager
-from ..api.models import Query, Response
-import threading
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

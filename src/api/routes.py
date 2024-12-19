@@ -2,9 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from ..services.system_manager import SystemManager
 from .models import Query, Response
 import logging
-
 from uuid import uuid4
-from time import time
 
 logger = logging.getLogger(__name__)
 

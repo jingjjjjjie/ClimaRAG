@@ -1,9 +1,8 @@
+import os
 import logging
 from .config.settings import DATA_PATH, PERSIST_DIRECTORY
 from .services.business_logic import RAGSystem
-from .utils.helpers import display_results
 from .services.data_processor import preprocess_and_store_data, DataProcessor
-import os
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

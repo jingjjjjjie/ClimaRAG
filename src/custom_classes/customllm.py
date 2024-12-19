@@ -3,13 +3,12 @@ RedPillLLM.py
 
 Defines a RedPillLLM class for interacting with the RedPill API.
 """
-from typing import Any, Dict, Iterator, List, Mapping, Optional
+from typing import Any, List, Optional
 
 import requests
 import json
 from langchain_core.callbacks.manager import CallbackManagerForLLMRun
 from langchain_core.language_models.llms import LLM
-from langchain_core.outputs import GenerationChunk
 
 
 class RedPillLLM(LLM):

@@ -1,9 +1,9 @@
+import os
 import logging
 from typing import Optional
 from ..config.settings import DATA_PATH, PERSIST_DIRECTORY
 from .data_processor import preprocess_and_store_data, DataProcessor
 from .business_logic import RAGSystem
-import os
 
 logger = logging.getLogger(__name__)
 

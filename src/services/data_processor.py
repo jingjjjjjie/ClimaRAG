@@ -1,13 +1,13 @@
+import os
 import logging
 from typing import List, Dict, Any
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
 from langchain_core.documents import Document
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from uuid import uuid4
-import os
 from ..config.settings import EMBEDDING_MODEL, PERSIST_DIRECTORY
 from ..utils.helpers import load_corpus
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
