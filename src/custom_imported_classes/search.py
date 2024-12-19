@@ -58,8 +58,10 @@ class FilteredGoogleSearchAPIWrapper(BaseModel):
         if len(results) == 0:
             return [{"Result": "No good Google Search Result was found"}]
             
+        
+        websites_to_ignore = ['https://www.youtube.com', 'https://www.google.com']
         for result in results:
-            if not result.get('link', '').startswith('https://www.youtube.com'):
+            if not any(result.get('link', '').startswith(website) for website in websites_to_ignore):
                 metadata_result = {
                     "title": result["title"],
                     "link": result["link"],
