@@ -57,7 +57,7 @@ cp .env.example .env
 # 编辑 .env 文件，填入必要的 API 密钥
 ```
 
-2. ��动服务：
+2. 启动服务：
 ```bash
 # 在RagSummarizer目录下
 python -m src.app
