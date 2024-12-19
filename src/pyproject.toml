@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=64.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rag_summarizer"
+version = "0.1.0"
+description = "A RAG-based document summarization and QA system"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+    "python-dotenv",
+    "langchain",
+    "langchain-chroma",
+    "langchain-community",
+    "langchain-core",
+    "langchain-huggingface",
+    "langgraph",
+    "chromadb",
+    "sentence-transformers",
+    "requests",
+    "google-api-python-client",
+    "typing-extensions",
+    "lark",
+    "beautifulsoup4",
+    "html2text",
+]
+
+[tool.setuptools]
+package-dir = {"" = "."}
+packages = [
+    "api",
+    "config",
+    "custom_classes",
+    "custom_imported_classes",
+    "models",
+    "services",
+    "tests",
+    "utils",
+] 
