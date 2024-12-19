@@ -13,3 +13,4 @@ sentence-transformers
 requests
 google-api-python-client
 typing-extensions
+lark

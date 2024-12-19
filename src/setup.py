@@ -22,6 +22,7 @@ setup(
         "requests",
         "google-api-python-client",
         "typing-extensions",
+        "lark",
     ],
     classifiers=[
         "Development Status :: 3 - Alpha",
