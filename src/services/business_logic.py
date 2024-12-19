@@ -1,7 +1,7 @@
 import os
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnablePassthrough, RunnableLambda
+from langchain_core.runnables import RunnableLambda
 from langchain.retrievers.self_query.base import SelfQueryRetriever
 from ..models.data_models import METADATA_FIELD_INFO, RouteQuery
 from ..tools.custom_chat_model import RedPillChatModel
@@ -14,15 +14,12 @@ from ..config.prompt_settings import (
     DOCUMENT_CONTENT_DESCRIPTION
 )
 from .memory_manager import RAGMemoryManager
-# from langchain.retrievers.web_research import WebResearchRetriever
-from langchain_community.retrievers.web_research import WebResearchRetriever
-from langchain_community.vectorstores import Chroma
-from langchain_community.utilities import GoogleSearchAPIWrapper
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain.chains import RetrievalQAWithSourcesChain
-from dotenv import load_dotenv
+from langchain.chains.qa_with_sources.retrieval import RetrievalQAWithSourcesChain
 import logging
 import re
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from ..custom.search import FilteredGoogleSearchAPIWrapper
+from ..custom.retrievers import CustomWebResearchRetriever
 
 # Set proxy environment variables
 os.environ['http_proxy'] = 'http://127.0.0.1:7890'
@@ -127,21 +124,26 @@ class RAGSystem:
         """Initialize web research components"""
         logger.info("Setting up web research retriever")
         try:
-            # Initialize Google Search
-            self.search = GoogleSearchAPIWrapper()
+            # Initialize our filtered Google Search
+            self.search = FilteredGoogleSearchAPIWrapper()
             
-            # Initialize Web Research Retriever using existing components
-            self.web_research_retriever = WebResearchRetriever.from_llm(
-                vectorstore=self.content_store,  # Reuse existing Chroma store
+            # Use our custom retriever with our filtered search
+            self.web_research_retriever = CustomWebResearchRetriever.from_llm(
+                vectorstore=self.content_store,
                 llm=self.llm,
                 search=self.search,
-                allow_dangerous_requests=True
+                allow_dangerous_requests=True,
+                num_search_results=1,
+                text_splitter=RecursiveCharacterTextSplitter(
+                    chunk_size=500,
+                    chunk_overlap=50
+                )
             )
             
-            # Initialize QA Chain for web research
             self.web_qa_chain = RetrievalQAWithSourcesChain.from_chain_type(
                 self.llm, 
-                retriever=self.web_research_retriever
+                retriever=self.web_research_retriever,
+                return_source_documents=True
             )
             
             logger.info("Web research components initialized successfully")
@@ -203,14 +205,23 @@ class RAGSystem:
 
                 logger.info(f"Web result: {web_result}")
                 
-                # Format the response with sources
+                # Format the response with answer
                 response = f"{web_result['answer']}\n\nSources:\n"
 
                 logger.info(f"Response: {response}")
 
-                for source in web_result.get('sources', []):
-                    response += f"- {source}\n"
-                
+                # Extract sources from source_documents
+                if 'source_documents' in web_result:
+                    for doc in web_result['source_documents']:
+                        metadata = doc.metadata
+                        source_url = metadata.get('source', '')
+                        title = metadata.get('title', '')
+                        if source_url:
+                            response += f"- WebPageTitle: {title}\nWebPageLink: {source_url}\n"
+                else:
+                    logger.warning("No source_documents found in web_result")
+                    logger.debug(f"Available keys in web_result: {web_result.keys()}")
+
                 return response
                 
             except Exception as e:
