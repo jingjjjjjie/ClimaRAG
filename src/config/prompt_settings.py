@@ -19,6 +19,11 @@ The last message in the history is the current question.
 cite your answers for example, [1] then add the reference and title at the end and use nice markdown formating
 """
 
+# RAG Fusion prompts
+RAG_FUSION_QUERY_TEMPLATE = """You are a helpful assistant that generates multiple search queries based on a single input query. \n
+Generate multiple search queries related to: {question} \n
+Output (4 queries):"""
+
 # Data source descriptions
 ABSTRACT_STORE_DESC = """Abstract_Store is a database with abstracts of papers related to climate change 
 or the environment"""

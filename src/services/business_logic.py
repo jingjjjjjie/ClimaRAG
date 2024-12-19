@@ -1,6 +1,7 @@
 import os
 import logging
 import re
+import json
 
 from langchain.chains.qa_with_sources.retrieval import RetrievalQAWithSourcesChain
 from langchain_core.prompts import ChatPromptTemplate
@@ -8,6 +9,8 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnableLambda
 from langchain.retrievers.self_query.base import SelfQueryRetriever
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.load import dumps, loads
+from operator import itemgetter
 
 from .memory_manager import RAGMemoryManager
 from ..models.data_models import METADATA_FIELD_INFO, RouteQuery
@@ -20,7 +23,8 @@ from ..config.prompt_settings import (
     ROUTER_SYSTEM_PROMPT,
     ROUTER_HUMAN_PROMPT,
     RAG_TEMPLATE,
-    DOCUMENT_CONTENT_DESCRIPTION
+    DOCUMENT_CONTENT_DESCRIPTION,
+    RAG_FUSION_QUERY_TEMPLATE
 )
 
 
@@ -65,6 +69,7 @@ class RAGSystem:
         try:
             self.setup_llms()
             self.setup_retrievers()
+            self.setup_rag_fusion()
             self.setup_chains()
             self.setup_router()
             logger.info("Successfully set up all RAG components")
@@ -107,9 +112,61 @@ class RAGSystem:
             search_kwargs={"k": 10}
         )
 
+    def setup_rag_fusion(self):
+        """Setup RAG Fusion components"""
+        logger.info("Setting up RAG Fusion")
+        
+        # Setup query generation prompt
+        self.prompt_rag_fusion = ChatPromptTemplate.from_template(RAG_FUSION_QUERY_TEMPLATE)
+        
+        # Setup query generation chain
+        self.generate_queries = (
+            self.prompt_rag_fusion 
+            | self.llm
+            | StrOutputParser() 
+            | (lambda x: x.split("\n"))
+        )
+        
+        # Setup Content Retriever with RAG Fusion
+        self.content_retriever_with_rag_fusion = self.generate_queries | self.content_retriever.map() | self.reciprocal_rank_fusion
+        
+        # Setup Content RAG Fusion Chain
+        self.content_rag_fusion_chain = (
+            {"context": self.content_retriever_with_rag_fusion, 
+             "question": itemgetter("question")} 
+            | ChatPromptTemplate.from_template(RAG_TEMPLATE)
+            | self.llm
+            | StrOutputParser()
+        )
+        
+        logger.info("RAG Fusion setup complete")
+
+    def reciprocal_rank_fusion(self, results: list[list], k=60):
+        """Reciprocal rank fusion that takes multiple lists of ranked documents"""
+        logger.info("Performing reciprocal rank fusion")
+        
+        # Initialize a dictionary to hold fused scores for each unique document
+        fused_scores = {}
+
+        # Iterate through each list of ranked documents
+        for docs in results:
+            # Iterate through each document in the list
+            for rank, doc in enumerate(docs):
+                doc_str = dumps(doc)
+                if doc_str not in fused_scores:
+                    fused_scores[doc_str] = 0
+                fused_scores[doc_str] += 1 / (rank + k)
+
+        # Sort documents based on fused scores
+        reranked_results = [
+            (loads(doc), score)
+            for doc, score in sorted(fused_scores.items(), key=lambda x: x[1], reverse=True)
+        ]
+
+        return reranked_results
+
     def setup_chains(self):
         logger.info("Setting up chains")
-        prompt = ChatPromptTemplate.from_template(RAG_TEMPLATE)
 
     def setup_router(self):
         logger.info("Setting up router")
@@ -155,9 +212,58 @@ class RAGSystem:
             logger.error(f"Error setting up web research: {str(e)}")
             raise
 
+    def process_web_search(self, result):
+        """Process a query using web search"""
+        logger.info("Processing web search query")
+        try:
+            logger.info(f"Result: {result}")
+            
+            if result.messages:
+                messages_str = str(result.messages)
+                logger.info(f"Messages string: {messages_str}")
+                
+                matches = re.findall(r"content='(.*?)'", messages_str)
+                
+                if matches:
+                    question = matches[-1]
+                    logger.info(f"Extracted question: {question}")
+                else:
+                    logger.warning("Could not extract content from messages")
+                    return "Could not process the question format."
+            else:
+                logger.warning("No messages found in result")
+                return "No question found to process."
+
+            logger.info(f"Question: {question}")
+            
+            web_result = self.web_qa_chain.invoke({
+                "question": question
+            })
+
+            logger.info(f"Web result: {web_result}")
+            
+            response = f"{web_result['answer']}\n\nSources:\n"
+            logger.info(f"Response: {response}")
+
+            if 'source_documents' in web_result:
+                for doc in web_result['source_documents']:
+                    metadata = doc.metadata
+                    source_url = metadata.get('source', '')
+                    title = metadata.get('title', '')
+                    if source_url:
+                        response += f"- WebPageTitle: {title}\nWebPageLink: {source_url}\n"
+            else:
+                logger.warning("No source_documents found in web_result")
+                logger.debug(f"Available keys in web_result: {web_result.keys()}")
+
+            return response
+            
+        except Exception as e:
+            logger.error(f"Error in web research: {str(e)}")
+            return "I apologize, but I couldn't find a reliable answer to your question at this moment."
+
     def choose_route(self, result):
         logger.info(f"Choosing route for result: {result}")
-
         logger.info(f"Result datasource: {result.datasource.lower()}")
 
         prompt = ChatPromptTemplate.from_template(RAG_TEMPLATE)
@@ -166,69 +272,14 @@ class RAGSystem:
             return result.messages
 
         if "abstract_store" in result.datasource.lower():
-            # return 'abstract_chain'
             return {"context": self.abstract_retriever, "question": RunnableLambda(return_messages)} | prompt | self.llm | StrOutputParser()
-            # return self.hyde_chain_abstract
         elif "content_store" in result.datasource.lower():
-            # return 'content_chain'
-            return {"context": self.content_retriever, "question": RunnableLambda(return_messages)} | prompt | self.llm | StrOutputParser()
-            # return self.hyde_chain_content
+            # Use RAG Fusion for content store queries
+            return {"question": RunnableLambda(return_messages)} | self.content_rag_fusion_chain
         else:
             # Use web research for other queries
             logger.info("Using web research retriever for query")
-            try:
-                logger.info(f"Result: {result}")
-                
-                # Get the last message content using regex
-                if result.messages:
-                    messages_str = str(result.messages)
-                    logger.info(f"Messages string: {messages_str}")
-                    
-                    # Extract content from the last message using regex
-                    # This pattern matches the last occurrence of content='...' before the final ]
-                    matches = re.findall(r"content='(.*?)'", messages_str)
-                    
-                    if matches:
-                        question = matches[-1]
-                        logger.info(f"Extracted question: {question}")
-                    else:
-                        logger.warning("Could not extract content from messages")
-                        return "Could not process the question format."
-                else:
-                    logger.warning("No messages found in result")
-                    return "No question found to process."
-
-                logger.info(f"Question: {question}")
-                
-                # Get response from web research
-                web_result = self.web_qa_chain.invoke({
-                    "question": question
-                })
-
-                logger.info(f"Web result: {web_result}")
-                
-                # Format the response with answer
-                response = f"{web_result['answer']}\n\nSources:\n"
-
-                logger.info(f"Response: {response}")
-
-                # Extract sources from source_documents
-                if 'source_documents' in web_result:
-                    for doc in web_result['source_documents']:
-                        metadata = doc.metadata
-                        source_url = metadata.get('source', '')
-                        title = metadata.get('title', '')
-                        if source_url:
-                            response += f"- WebPageTitle: {title}\nWebPageLink: {source_url}\n"
-                else:
-                    logger.warning("No source_documents found in web_result")
-                    logger.debug(f"Available keys in web_result: {web_result.keys()}")
-
-                return response
-                
-            except Exception as e:
-                logger.error(f"Error in web research: {str(e)}")
-                return "I apologize, but I couldn't find a reliable answer to your question at this moment."
+            return self.process_web_search(result)
 
     # def format_message_history(self, messages):
     #     """Format message history into a readable string"""
