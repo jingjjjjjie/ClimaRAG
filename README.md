@@ -39,9 +39,11 @@ npm install
 
 - FastAPI - Web 框架
 - LangChain - RAG 系统核心
+- LangGraph - 对话记忆管理
 - ChromaDB - 向量数据库
 - Sentence-Transformers - 文本嵌入
 - 其他重要组件：
+  - langchain-chroma
   - langchain-community
   - langchain-core
   - langchain-huggingface

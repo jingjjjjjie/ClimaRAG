@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="rag-summarizer",
+    name="rag_summarizer",
     version="0.1.0",
     description="A RAG-based document summarization and QA system",
     packages=find_packages(),
@@ -12,9 +12,11 @@ setup(
         "pydantic",
         "python-dotenv",
         "langchain",
+        "langchain-chroma",
         "langchain-community",
         "langchain-core",
         "langchain-huggingface",
+        "langgraph",
         "chromadb",
         "sentence-transformers",
         "requests",

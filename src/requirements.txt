@@ -3,9 +3,11 @@ uvicorn
 pydantic
 python-dotenv
 langchain
+langchain-chroma
 langchain-community
 langchain-core
 langchain-huggingface
+langgraph
 chromadb
 sentence-transformers
 requests
