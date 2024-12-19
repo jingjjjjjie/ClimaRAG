@@ -15,6 +15,8 @@ RAG_TEMPLATE = """Answer the question based only on the following context:
 This is the conversation history:
 {question}
 The last message in the history is the current question.
+
+cite your answers for example, [1] then add the reference and title at the end and use nice markdown formating
 """
 
 # Data source descriptions
