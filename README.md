@@ -81,6 +81,8 @@ http://localhost:3000/
 ## 项目结构
 
 ```
+python/                         # 开发和测试代码
+frontend/                       # 前端代码
 src/
 ├── api/                        # API 接口层
 ├── services/                   # 核心服务层
