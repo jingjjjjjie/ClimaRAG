@@ -2,7 +2,7 @@
 
 基于检索增强生成（RAG）的问答系统
 
-![完整流程图](assets/Pipeline.svg)
+![完整流程图](assets/Pipeline.jpeg)
 
 ## 项目简介
 
