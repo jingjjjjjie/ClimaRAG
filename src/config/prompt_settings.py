@@ -1,40 +1,45 @@
-# Router prompts
-ROUTER_SYSTEM_PROMPT = """You are an expert at routing a user question to the appropriate data source. 
-You also faithfully return the conversation history with the user without modifications."""
+# Data source descriptions
+ABSTRACT_STORE_DESC = """Abstract_Store is a Database of climate & environmental research abstracts"""
 
-ROUTER_HUMAN_PROMPT = """Given the following query and conversation history, determine the appropriate data source 
-to route the query to. The query is the last message in the conversation history.
+CONTENT_STORE_DESC = """Content_Store is a Database of climate & environmental research full-texts"""
+
+ROUTING_DESCRIPTION = f"""Given {ABSTRACT_STORE_DESC} and {CONTENT_STORE_DESC}:
+ Return 'Abstract_Store' for summaries and general queries
+ Return 'Content_Store' for specific content/concept details
+ Return 'OTHER' for unrelated or invalid queries"""
+
+# Router prompts
+ROUTER_SYSTEM_PROMPT = "Expert router that directs queries to appropriate data sources and preserves conversation history"
+
+ROUTER_HUMAN_PROMPT = """Route the last message in conversation history to appropriate data source.
 
 Conversation History:
 {messages}
 """
 
-# RAG prompts
-RAG_TEMPLATE = """Answer the question based only on the following context:
-{context}
-This is the conversation history:
-{question}
-The last message in the history is the current question.
 
-cite your answers for example, [1] then add the reference and title at the end and use nice markdown formating
-"""
 
 # RAG Fusion prompts
-RAG_FUSION_QUERY_TEMPLATE = """You are a helpful assistant that generates multiple search queries based on a single input query. \n
-Generate multiple search queries related to: {question} \n
-Output (4 queries):"""
+RAG_FUSION_QUERY_TEMPLATE = """Generate 4 progressive search queries for {question}:
+. Basic concept/overview
+. Key components/factors
+. Detailed analysis/process
+. Advanced implications/applications"""
 
-# Data source descriptions
-ABSTRACT_STORE_DESC = """Abstract_Store is a database with abstracts of papers related to climate change 
-or the environment"""
 
-CONTENT_STORE_DESC = """Content_Store is a database with the full text of papers related to climate change 
-or the environment"""
+# RAG prompts
+RAG_TEMPLATE = """Answer the last message using only provided context. 
+Context:
+{context}
+Chat History:
+{question}
+Requirements:
+ Use numbered citations [1]
+ Include references with titles
+ Format in markdown
+ Focus on relevant information only"""
 
-ROUTING_DESCRIPTION = f"""{ABSTRACT_STORE_DESC}. {CONTENT_STORE_DESC}. Given a user question choose which 
-datasource would be most relevant for answering their question. For Summarization or more general use cases, 
-route to Abstract_Store, only if asked on concepts or specific content route to Content_Store. Otherwise, if 
-you encounter something weird or not related to climate change or the environment, return OTHER"""
+
 
 # Document content description
 DOCUMENT_CONTENT_DESCRIPTION = "Thesis in the climate change field"
