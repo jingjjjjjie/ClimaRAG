@@ -18,7 +18,7 @@ export default {
     },
     extend: {
       colors: {
-        'primary-blue': 'rgb(146, 179, 202)',
+        'primary-blue': 'rgb(0, 76, 153)',
         'primary-orange': 'rgb(243, 195, 177)',
         'main-text': 'rgb(0, 43, 49)',
         'error-red': 'rgb(208, 69, 82)',
@@ -26,11 +26,17 @@ export default {
       animation: {
         'spinner': 'spinner 1.5s linear infinite',
         'spinner-delayed': 'spinner 1.5s linear infinite 0.75s',
+        'fade' : 'fade 3s ease-in-out infinite',
       },
       keyframes: {
         spinner: {
           '0%': { transform: 'scale(0)', opacity: 1 },
           '100%': { transform: 'scale(1)', opacity: 0 },
+        },
+        fade: {
+          '0%': { opacity: 0 },
+          '50%': { opacity: 1 },
+          '100%': { opacity: 0 },
         },
       },
     },

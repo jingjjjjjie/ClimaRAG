@@ -31,4 +31,9 @@ METADATA_FIELD_INFO = [
         description="The abstract of the thesis",
         type="integer",
     ),
+    AttributeInfo(
+        name="source",
+        description="The URL of source of the thesis",
+        type="string",
+    ),
 ]
