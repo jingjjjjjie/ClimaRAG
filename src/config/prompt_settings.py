@@ -16,7 +16,7 @@ This is the conversation history:
 {question}
 The last message in the history is the current question.
 
-cite your answers for example, [1] then add the reference and title at the end and use nice markdown formating
+cite your answers for example, [1] then add the reference and title and source after title at the end and use nice markdown formating
 """
 
 # RAG Fusion prompts
