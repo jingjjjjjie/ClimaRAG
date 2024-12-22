@@ -99,7 +99,7 @@ class RAGSystem:
             METADATA_FIELD_INFO,
             verbose=True,
             enable_limit=True,
-            search_kwargs={"k": 10}
+            search_kwargs={"k": 5}
         )
         
         self.content_retriever = SelfQueryRetriever.from_llm(
@@ -109,7 +109,7 @@ class RAGSystem:
             METADATA_FIELD_INFO,
             verbose=True,
             enable_limit=True,
-            search_kwargs={"k": 10}
+            search_kwargs={"k": 5}
         )
 
     def setup_rag_fusion(self):
