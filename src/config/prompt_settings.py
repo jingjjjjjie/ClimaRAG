@@ -35,7 +35,7 @@ Chat History:
 {question}
 Requirements:
  Use numbered citations [1]
- Include references with titles
+ Include references in APA reference style, attach a clickable link to the source link, Example: [1] Author. (Year). _Source Title._ [https://www.example.com](https://www.example.com)
  Format in markdown
  Focus on relevant information only"""
 
