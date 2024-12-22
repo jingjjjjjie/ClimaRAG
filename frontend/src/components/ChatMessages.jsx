@@ -1,4 +1,5 @@
 import Markdown from 'react-markdown';
+import remarkGfm from 'remark-gfm'
 import useAutoScroll from '@/hooks/useAutoScroll';
 import Spinner from '@/components/Spinner';
 import userIcon from '@/assets/images/user.svg';
@@ -20,9 +21,14 @@ function ChatMessages({ messages, isLoading }) {
           )}
           <div>
             <div className='markdown-container'>
-              {(loading && !content) ? <Spinner />
+              {(loading && !content) ? (
+                <div className='flex items-center space-x-2'>
+                <Spinner /> 
+                <p className='ml-4 mt-2 animate-fade'>Your personal agent is trying hard to get the best answer for you.</p>
+                </div>
+              )
                 : (role === 'assistant')
-                  ? <Markdown>{content}</Markdown>
+                  ? <Markdown remarkPlugins={[remarkGfm]}>{content}</Markdown>
                   : <div className='whitespace-pre-line'>{content}</div>
               }
             </div>

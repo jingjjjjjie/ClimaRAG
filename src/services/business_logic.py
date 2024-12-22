@@ -28,9 +28,19 @@ from ..config.prompt_settings import (
 )
 
 
-# Set proxy environment variables (for VPN)
-os.environ['http_proxy'] = os.getenv('HTTP_PROXY')
-os.environ['https_proxy'] = os.getenv('HTTPS_PROXY')
+# Get the HTTP_PROXY environment variable
+http_proxy = os.getenv('HTTP_PROXY')
+https_proxy = os.getenv('HTTPS_PROXY')
+
+if http_proxy:
+    # Set proxy environment variables (for VPN)
+    os.environ['http_proxy'] = http_proxy
+else:
+    print('cant find http_proxy')
+if https_proxy:
+    os.environ['https_proxy'] = https_proxy
+else:
+    print('cant find https_proxy')
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -251,7 +261,7 @@ class RAGSystem:
                     source_url = metadata.get('source', '')
                     title = metadata.get('title', '')
                     if source_url:
-                        response += f"- WebPageTitle: {title}\nWebPageLink: {source_url}\n"
+                        response += f"- {title}\n {source_url}\n"
             else:
                 logger.warning("No source_documents found in web_result")
                 logger.debug(f"Available keys in web_result: {web_result.keys()}")

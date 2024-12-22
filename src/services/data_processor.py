@@ -74,7 +74,8 @@ class DataProcessor:
                 page_content=thesis['Abstract'],
                 metadata={
                     "title": thesis['Title'],
-                    "year": year
+                    "year": year,
+                    "source": thesis['clickable_url']
                 }
             )
             abstract_docs.append(abstract_doc)
@@ -84,7 +85,8 @@ class DataProcessor:
                 page_content=thesis['full_text'],
                 metadata={
                     "title": thesis['Title'],
-                    "year": year
+                    "year": year,
+                    "source": thesis['clickable_url']
                 }
             )
             content_docs.append(content_doc)
