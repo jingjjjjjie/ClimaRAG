@@ -223,7 +223,7 @@ class RAGSystem:
             raise
 
     def process_web_search(self, result):
-        """Process a query using web search"""
+        """Process a query using web search and format response with APA-style citations"""
         logger.info("Processing web search query")
         try:
             logger.info(f"Result: {result}")
@@ -238,8 +238,13 @@ class RAGSystem:
                     question = matches[-1]
                     logger.info(f"Extracted question: {question}")
                 else:
-                    logger.warning("Could not extract content from messages")
-                    return "Could not process the question format."
+                    try: 
+                        # User call for web search in the first message, didn't get formatted correctly, so try this format
+                        question = result.messages
+                    except Exception as e:
+                        logger.error(f"Error extracting question: {str(e)}")
+                        logger.warning("Could not extract content from messages")
+                        return "Could not process the question format."
             else:
                 logger.warning("No messages found in result")
                 return "No question found to process."
@@ -252,16 +257,27 @@ class RAGSystem:
 
             logger.info(f"Web result: {web_result}")
             
-            response = f"{web_result['answer']}\n\nSources:\n"
+            response = f"{web_result['answer']}\n\n### References\n"
             logger.info(f"Response: {response}")
 
+            # Deduplicate sources using a dictionary with URL as key
+            sources = {}
             if 'source_documents' in web_result:
                 for doc in web_result['source_documents']:
                     metadata = doc.metadata
-                    source_url = metadata.get('source', '')
-                    title = metadata.get('title', '')
-                    if source_url:
-                        response += f"- {title}\n {source_url}\n"
+                    
+                    print("metadata", metadata)
+                    
+                    source_url = metadata.get('source', '').strip()
+                    title = metadata.get('title', '').strip()
+                    
+                    if source_url and source_url not in sources:
+                        sources[source_url] = {
+                            'title': title,
+                            'url': source_url,
+                        }
+                        
+                        response += f"- {title}. Retrieved from [{source_url}]({source_url})\n"
             else:
                 logger.warning("No source_documents found in web_result")
                 logger.debug(f"Available keys in web_result: {web_result.keys()}")
