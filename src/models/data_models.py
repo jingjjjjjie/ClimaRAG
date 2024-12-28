@@ -1,7 +1,7 @@
 from typing import Literal
 from pydantic import BaseModel, Field
 from langchain.chains.query_constructor.schema import AttributeInfo
-from ..config.prompt_settings import ROUTING_DESCRIPTION
+from ..config.prompt_settings import ROUTING_DESCRIPTION, EVALUATION_DESCRIPTION
 
 class RouteQuery(BaseModel):
     """Route a user query to the most relevant datasource."""
@@ -12,6 +12,10 @@ class RouteQuery(BaseModel):
     messages: str = Field(
         ...,
         description="The conversation history with the user in the format received from the API"
+    )
+    evaluation: bool = Field(
+        ...,
+        description=EVALUATION_DESCRIPTION
     )
 
 # Metadata field information for retrievers

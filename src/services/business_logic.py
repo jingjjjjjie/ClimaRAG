@@ -23,6 +23,7 @@ from ..config.prompt_settings import (
     ROUTER_SYSTEM_PROMPT,
     ROUTER_HUMAN_PROMPT,
     RAG_TEMPLATE,
+    EVALUATE_TEMPLATE,
     DOCUMENT_CONTENT_DESCRIPTION,
     RAG_FUSION_QUERY_TEMPLATE
 )
@@ -149,6 +150,14 @@ class RAGSystem:
             | StrOutputParser()
         )
         
+        self.content_rag_fusion_chain_evaluate = (
+            {"context": self.content_retriever_with_rag_fusion, 
+             "question": itemgetter("question")} 
+            | ChatPromptTemplate.from_template(EVALUATE_TEMPLATE)
+            | self.llm
+            | StrOutputParser()
+        )
+
         logger.info("RAG Fusion setup complete")
 
     def reciprocal_rank_fusion(self, results: list[list], k=60):
@@ -291,21 +300,32 @@ class RAGSystem:
     def choose_route(self, result):
         logger.info(f"Choosing route for result: {result}")
         logger.info(f"Result datasource: {result.datasource.lower()}")
+        logger.info(f"Evaluation: {result.evaluation}")
 
         prompt = ChatPromptTemplate.from_template(RAG_TEMPLATE)
 
         def return_messages(result):
             return result.messages
+        
+        if result.evaluation == True:
+            prompt = ChatPromptTemplate.from_template(EVALUATE_TEMPLATE)
+            query_comp = result.messages
+            print(query_comp)
+            query_temp = query_comp.replace("[This is a evaluation process]", "")
 
-        if "abstract_store" in result.datasource.lower():
+        if "abstract_store" in result.datasource.lower() and result.evaluation == False:
             return {"context": self.abstract_retriever, "question": RunnableLambda(return_messages)} | prompt | self.llm | StrOutputParser()
-        elif "content_store" in result.datasource.lower():
+        elif "content_store" in result.datasource.lower() and result.evaluation == False:
             # Use RAG Fusion for content store queries
             return {"question": RunnableLambda(return_messages)} | self.content_rag_fusion_chain
-        else:
             # Use web research for other queries
             logger.info("Using web research retriever for query")
             return self.process_web_search(result)
+        elif "abstract_store" in result.datasource.lower() and result.evaluation == True:
+            return {"context": self.abstract_retriever, "question": RunnableLambda(lambda _:query_temp)} | prompt | self.llm | StrOutputParser()
+        elif "content_store" in result.datasource.lower() and result.evaluation == True:
+            # Use RAG Fusion for content store queries
+            return {"question": RunnableLambda(lambda _:query_temp)} | self.content_rag_fusion_chain_evaluate
 
     # def format_message_history(self, messages):
     #     """Format message history into a readable string"""
@@ -329,4 +349,24 @@ class RAGSystem:
                 
         except Exception as e:
             logger.error(f"Error processing query: {str(e)}")
+            raise
+
+    def process_evaluation(self, query):
+        """
+        Process a evaluation
+        
+        Args:
+            query: Can be either a string or a list of messages
+        """
+        logger.info(f"Processing query")
+        query = f"{query} [This is a evaluation process]"
+
+        try:
+            # Pass the result to the router for routing
+            answer = self.full_chain.invoke(query)
+
+            return answer      
+                
+        except Exception as e:
+            logger.error(f"Error processing evaluation: {str(e)}")
             raise
