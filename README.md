@@ -104,13 +104,14 @@ src/
 ├── custom_classes/             # 自定义大模型类
 ├── utils/                      # 通用工具
 ├── data/                       # 数据源文件，初次运行时会将其编码为嵌入向量，存入向量数据库
-├── tests/                      # 测试文件
+├── tests/                      # 测试文件（用于开发，请勿使用）
 ├── chroma_db/                  # 向量数据库存储
 ├── app.py                      # FastAPI 应用入口
-├── main.py                     # 测试主程序入口
-├── requirements.txt            # 项目依赖
-├── setup.py                    # 安装配置
+├── main.py                     # 测试主程序入口（用于开发，请勿使用）
 └── .env.example                # 环境变量示例
+setup.py                    # 安装配置：用于pip install .
+pyproject.toml              # 安装配置：用于pip install -e .
+requirements.txt            # 项目依赖：用于pip install -r requirements.txt
 ```
 
 ## 开发状态
