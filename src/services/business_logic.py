@@ -1,7 +1,7 @@
 import os
 import logging
 import re
-import json
+import traceback
 
 from langchain.chains.qa_with_sources.retrieval import RetrievalQAWithSourcesChain
 from langchain_core.prompts import ChatPromptTemplate
@@ -28,24 +28,22 @@ from ..config.prompt_settings import (
     RAG_FUSION_QUERY_TEMPLATE
 )
 
-
-# Get the HTTP_PROXY environment variable
-http_proxy = os.getenv('HTTP_PROXY')
-https_proxy = os.getenv('HTTPS_PROXY')
-
-if http_proxy:
-    # Set proxy environment variables (for VPN)
-    os.environ['http_proxy'] = http_proxy
-else:
-    print('cant find http_proxy')
-if https_proxy:
-    os.environ['https_proxy'] = https_proxy
-else:
-    print('cant find https_proxy')
-
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+
+# Set up the environment variables
+http_proxy = os.getenv('HTTP_PROXY') or None
+https_proxy = os.getenv('HTTPS_PROXY') or None
+web_search_enabled = os.getenv('WEB_SEARCH_ENABLED') == "true"
+
+print("http_proxy", http_proxy)
+print("https_proxy", https_proxy)
+print("web_search_enabled", web_search_enabled)
+
+
+
 
 class RAGSystem:
     _instance = None
@@ -72,8 +70,21 @@ class RAGSystem:
         logger.info("Initializing memory manager")
         self.memory_manager = RAGMemoryManager(self)
         
+        # Setup the environment variables
+        if not http_proxy:
+            logger.warning('Cant find http_proxy. Setting it to None. This will be fine if your VPN doesnt need a proxy.')
+        if not https_proxy:
+            logger.warning('Cant find https_proxy. Setting it to None. This will be fine if your VPN doesnt need a proxy.')
+        
+        self.web_search_enabled = web_search_enabled
+        if self.web_search_enabled:
+            logger.info('Web search is enabled.')
+        else:
+            logger.warning('Web search is disabled. Web search will not work but you can still use the RAG system')
+        
         # Initialize web research components
-        self.setup_web_research()
+        if self.web_search_enabled:
+            self.setup_web_research()
 
     def setup_components(self):
         logger.info("Setting up RAG components")
@@ -141,23 +152,6 @@ class RAGSystem:
         # Setup Content Retriever with RAG Fusion
         self.content_retriever_with_rag_fusion = self.generate_queries | self.content_retriever.map() | self.reciprocal_rank_fusion
         
-        # Setup Content RAG Fusion Chain
-        self.content_rag_fusion_chain = (
-            {"context": self.content_retriever_with_rag_fusion, 
-             "question": itemgetter("question")} 
-            | ChatPromptTemplate.from_template(RAG_TEMPLATE)
-            | self.llm
-            | StrOutputParser()
-        )
-        
-        self.content_rag_fusion_chain_evaluate = (
-            {"context": self.content_retriever_with_rag_fusion, 
-             "question": itemgetter("question")} 
-            | ChatPromptTemplate.from_template(EVALUATE_TEMPLATE)
-            | self.llm
-            | StrOutputParser()
-        )
-
         logger.info("RAG Fusion setup complete")
 
     def reciprocal_rank_fusion(self, results: list[list], k=60):
@@ -181,6 +175,8 @@ class RAGSystem:
             (loads(doc), score)
             for doc, score in sorted(fused_scores.items(), key=lambda x: x[1], reverse=True)
         ]
+        
+        logger.info(f"Done Reranking results: {reranked_results}")
 
         return reranked_results
 
@@ -231,14 +227,14 @@ class RAGSystem:
             logger.error(f"Error setting up web research: {str(e)}")
             raise
 
-    def process_web_search(self, result):
+    def process_web_search(self, messages):
         """Process a query using web search and format response with APA-style citations"""
         logger.info("Processing web search query")
         try:
-            logger.info(f"Result: {result}")
+            logger.info(f"Messages: {messages}")
             
-            if result.messages:
-                messages_str = str(result.messages)
+            if messages:
+                messages_str = str(messages)
                 logger.info(f"Messages string: {messages_str}")
                 
                 matches = re.findall(r"content='(.*?)'", messages_str)
@@ -249,7 +245,7 @@ class RAGSystem:
                 else:
                     try: 
                         # User call for web search in the first message, didn't get formatted correctly, so try this format
-                        question = result.messages
+                        question = messages
                     except Exception as e:
                         logger.error(f"Error extracting question: {str(e)}")
                         logger.warning("Could not extract content from messages")
@@ -295,37 +291,54 @@ class RAGSystem:
             
         except Exception as e:
             logger.error(f"Error in web research: {str(e)}")
-            return "I apologize, but I couldn't find a reliable answer to your question at this moment."
+            return "I apologize, it seems like there is likely a connection issue with the web search. Please try again later."
 
     def choose_route(self, result):
         logger.info(f"Choosing route for result: {result}")
         logger.info(f"Result datasource: {result.datasource.lower()}")
         logger.info(f"Evaluation: {result.evaluation}")
-
-        prompt = ChatPromptTemplate.from_template(RAG_TEMPLATE)
-
-        def return_messages(result):
-            return result.messages
         
-        if result.evaluation == True:
-            prompt = ChatPromptTemplate.from_template(EVALUATE_TEMPLATE)
-            query_comp = result.messages
-            print(query_comp)
-            query_temp = query_comp.replace("[This is a evaluation process]", "")
+        def return_messages(result):
+            # helper function to return the messages
+            if result.evaluation == False:
+                print("type(result.messages)", type(result.messages))
+                return result.messages
+            else:
+                query_comp = result.messages
+                query_temp = query_comp.replace("[This is a evaluation process]", "")
+                print("type(query_temp)", type(query_temp))
+                return query_temp
+        
+        # define the template
+        template = RAG_TEMPLATE if result.evaluation == False else EVALUATE_TEMPLATE
 
-        if "abstract_store" in result.datasource.lower() and result.evaluation == False:
-            return {"context": self.abstract_retriever, "question": RunnableLambda(return_messages)} | prompt | self.llm | StrOutputParser()
-        elif "content_store" in result.datasource.lower() and result.evaluation == False:
-            # Use RAG Fusion for content store queries
-            return {"question": RunnableLambda(return_messages)} | self.content_rag_fusion_chain
-            # Use web research for other queries
-            logger.info("Using web research retriever for query")
-            return self.process_web_search(result)
-        elif "abstract_store" in result.datasource.lower() and result.evaluation == True:
-            return {"context": self.abstract_retriever, "question": RunnableLambda(lambda _:query_temp)} | prompt | self.llm | StrOutputParser()
-        elif "content_store" in result.datasource.lower() and result.evaluation == True:
-            # Use RAG Fusion for content store queries
-            return {"question": RunnableLambda(lambda _:query_temp)} | self.content_rag_fusion_chain_evaluate
+        if "abstract_store" in result.datasource.lower():
+            # Using abstract retriever for query
+            abstract_chain = ({"context": self.abstract_retriever, "question": RunnableLambda(return_messages)} 
+                             | ChatPromptTemplate.from_template(template)
+                             | self.llm
+                             | StrOutputParser())
+            return abstract_chain
+        elif "content_store" in result.datasource.lower():
+            # Using content retriever with RAG Fusion for query
+            # Split into two variables to avoid python thinking | is an or operator
+            input = {"question": RunnableLambda(return_messages)}
+            chain = {"context": self.content_retriever_with_rag_fusion, "question": itemgetter("question")} | ChatPromptTemplate.from_template(template) | self.llm | StrOutputParser()
+            content_chain = input | chain
+            return content_chain
+        else:
+            if self.web_search_enabled:
+                # Use web research for other queries if web search is enabled
+                return self.process_web_search(return_messages(result))
+            else:
+                return "This query involves web search. Web search is disabled. Web search will not work but you can still use the RAG system"
+        
+        
+        # elif "abstract_store" in result.datasource.lower() and result.evaluation == True:
+        #     return {"context": self.abstract_retriever, "question": RunnableLambda(lambda _:query_temp)} | prompt | self.llm | StrOutputParser()
+        # elif "content_store" in result.datasource.lower() and result.evaluation == True:
+        #     # Use RAG Fusion for content store queries
+        #     return {"question": RunnableLambda(lambda _:query_temp)} | self.content_rag_fusion_chain_evaluate
 
     # def format_message_history(self, messages):
     #     """Format message history into a readable string"""
@@ -349,6 +362,7 @@ class RAGSystem:
                 
         except Exception as e:
             logger.error(f"Error processing query: {str(e)}")
+            traceback.print_exc()
             raise
 
     def process_evaluation(self, query):
@@ -369,4 +383,5 @@ class RAGSystem:
                 
         except Exception as e:
             logger.error(f"Error processing evaluation: {str(e)}")
+            traceback.print_exc()
             raise
