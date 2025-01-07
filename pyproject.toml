@@ -32,12 +32,12 @@ dependencies = [
 [tool.setuptools]
 package-dir = {"" = "."}
 packages = [
-    "api",
-    "config",
-    "custom_classes",
-    "custom_imported_classes",
-    "models",
-    "services",
-    "tests",
-    "utils",
+    "src.api",
+    "src.config",
+    "src.custom_classes",
+    "src.custom_imported_classes",
+    "src.models",
+    "src.services",
+    "src.tests",
+    "src.utils"
 ] 
