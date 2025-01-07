@@ -4,7 +4,7 @@ import os
 load_dotenv()
 
 # API Keys
-RED_PILL_API_KEY = os.getenv("RED_PILL_API_KEY_XN")
+RED_PILL_API_KEY = os.getenv("RED_PILL_API_KEY")
 
 # Model Settings
 EMBEDDING_MODEL = "sentence-transformers/all-mpnet-base-v2"
