@@ -21,7 +21,6 @@ git clone [仓库地址]
 
 2. 安装后端依赖：
 ```bash
-cd src
 pip install -r requirements.txt
 ```
 
@@ -58,7 +57,7 @@ npm install
 ```bash
 cd src
 cp .env.example .env
-# 编辑 .env 文件，填入必要的 API 密钥
+# 编辑 .env 文件，填入必要的 API 密钥、代理地址（如有需要）等
 ```
 
 2. 启动服务：
@@ -78,6 +77,12 @@ npm run dev
 # 默认端口为3000
 http://localhost:3000/
 ```
+
+### 补充说明：VPN代理
+
+- 如果您的网络环境需要使用VPN代理，请根据实际情况修改`.env`文件中的`HTTP_PROXY`和`HTTPS_PROXY`环境变量。
+- 如果您的网络环境不需要使用VPN代理，请将`HTTP_PROXY`和`HTTPS_PROXY`设置为空。
+- 如果您没有VPN，请将`WEB_SEARCH_ENABLED`设置为`false`，您将不能使用Google搜索，但可以继续使用离线RAG。
 
 ## 项目参数设置
 
