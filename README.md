@@ -22,6 +22,7 @@ git clone [仓库地址]
 2. 安装后端依赖：
 ```bash
 cd RagSummarizer
+# 建议使用虚拟环境 e.g. conda create -n rag python=3.9 && conda activate rag
 pip install -r requirements.txt
 ```
 
