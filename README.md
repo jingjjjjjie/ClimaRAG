@@ -21,6 +21,7 @@ git clone [仓库地址]
 
 2. 安装后端依赖：
 ```bash
+cd RagSummarizer
 pip install -r requirements.txt
 ```
 
@@ -57,6 +58,7 @@ npm install
 ```bash
 cd src
 cp .env.example .env
+# 复制 .env.example 文件，重命名为 .env 文件
 # 编辑 .env 文件，填入必要的 API 密钥、代理地址（如有需要）等
 ```
 
