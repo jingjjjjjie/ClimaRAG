@@ -51,3 +51,17 @@ async def process_query(query: Query, rag_system = Depends(get_rag_system)):
     except Exception as e:
         logger.error(f"Error processing query: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+    
+@router.post("/evaluate", response_model=Response)
+async def process_evaluation(query: Query, rag_system = Depends(get_rag_system)):
+    try:
+        logger.info(f"Processing evaluation query: {query.text}")
+        print(query.text)
+        result = rag_system.process_evaluation(query.text)
+    
+        return Response(
+            answer=result,
+        )
+    except Exception as e:
+        logger.error(f"Error processing evaluation query: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
