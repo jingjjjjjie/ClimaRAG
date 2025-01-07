@@ -1,7 +1,7 @@
 # Data source descriptions
-ABSTRACT_STORE_DESC = """Abstract_Store is a Database of climate & environmental research abstracts, including climate anxiety and human activities on the environment."""
+ABSTRACT_STORE_DESC = """Abstract_Store is a Database of climate & environmental research abstracts, including topics related to causes and impacts of climate change, climate anxiety and human activities on the environment."""
 
-CONTENT_STORE_DESC = """Content_Store is a Database of climate & environmental research full-texts, including climate anxiety and human activities on the environment."""
+CONTENT_STORE_DESC = """Content_Store is a Database of climate & environmental research full-texts, including topics related to causes and impacts of climate change, climate anxiety and human activities on the environment."""
 
 ROUTING_DESCRIPTION = f"""Given that {ABSTRACT_STORE_DESC} and {CONTENT_STORE_DESC}:
  Return 'Abstract_Store' for summaries and general queries
@@ -17,9 +17,9 @@ Conversation History:
 {messages}
 """
 
-EVALUATION_DESCRIPTION = f"""Check if the queries is a evaluation process, it is mentioned in the query with [This is a evaluation process]
-Return True if the queries mentioned that it a evaluation process 
-Return False if it did not mentioned"""
+EVALUATION_DESCRIPTION = f"""Check if the query is a evaluation process, it is mentioned in the query with [This is a evaluation process]
+Return True if the query mentioned that it is a evaluation process 
+Return False if it did not mention"""
 
 
 
