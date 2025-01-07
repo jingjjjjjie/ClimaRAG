@@ -119,10 +119,6 @@ src/
 
 项目处于积极开发阶段，API 可能会有变动。
 
-## 许可证
-
-MIT License
-
 ## 贡献指南
 
 欢迎提交 Issue 和 Pull Request！
