@@ -17,6 +17,10 @@ Conversation History:
 {messages}
 """
 
+EVALUATION_DESCRIPTION = f"""Check if the queries is a evaluation process, it is mentioned in the query with [This is a evaluation process]
+Return True if the queries mentioned that it a evaluation process 
+Return False if it did not mentioned"""
+
 
 
 # RAG Fusion prompts
@@ -37,6 +41,18 @@ Chat History:
 Requirements:
  Use numbered citations [1]
  Include references list at the end in APA REFERENCE STYLE, attach a clickable link to the source in the reference list.
+ Format in markdown
+ Focus on relevant information only"""
+
+# RAG prompts
+EVALUATE_TEMPLATE = """Answer the last message using only provided context. 
+Context:
+{context}
+Chat History:
+{question}
+Requirements:
+ Use numbered citations [1]
+ Include references in APA reference style, attach a clickable link to the source link, and return the 1-3 sentences of groundtruth of the references,Example: [1] Author. (Year). _Source Title._ [https://www.example.com](https://www.example.com) \n Groundtruth:""
  Format in markdown
  Focus on relevant information only"""
 
