@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useImmer } from 'use-immer';
 import api from '@/api';
 import ChatMessages from '@/components/ChatMessages';
@@ -8,14 +8,50 @@ function Chatbot() {
   const [chatId, setChatId] = useState(null);
   const [messages, setMessages] = useImmer([]);
   const [newMessage, setNewMessage] = useState('');
+  const [isPageVisible, setIsPageVisible] = useState(true);
 
   const isLoading = messages.length && messages[messages.length - 1].loading;
+
+  useEffect(() => {
+    function handleVisibilityChange() {
+      setIsPageVisible(!document.hidden);
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
+  function streamAnswer(answer) {
+    const worker = new Worker(new URL('../streamWorker.js', import.meta.url));
+    const chunkSize = 1; // Adjust as needed
+
+    worker.postMessage({ answer, chunkSize });
+
+    worker.onmessage = function(event) {
+      const { chunk, done } = event.data;
+
+      if (!done) {
+        setMessages(draft => {
+          draft[draft.length - 1].content += chunk;
+        });
+      } else {
+        setMessages(draft => {
+          draft[draft.length - 1].loading = false;
+        });
+        worker.terminate();
+      }
+    };
+  }
 
   async function submitNewMessage() {
     const trimmedMessage = newMessage.trim();
     if (!trimmedMessage || isLoading) return;
 
-    setMessages(draft => [...draft,
+    setMessages(draft => [
+      ...draft,
       { role: 'user', content: trimmedMessage },
       { role: 'assistant', content: '', sources: [], loading: true }
     ]);
@@ -35,27 +71,7 @@ function Chatbot() {
       const answer = stream.answer;
       console.log(answer);
 
-      // Simulate the streaming behavior
-      let currentIndex = -1;
-      const chunkSize = 1; // You can adjust this based on how fast you want the stream
-      const totalLength = answer.length;
-
-      const interval = setInterval(() => {
-        // Append a chunk to the message content
-        setMessages(draft => {
-          draft[draft.length - 1].content += answer.slice(currentIndex, currentIndex + chunkSize);
-        });
-
-        currentIndex += chunkSize;
-        
-        if (currentIndex >= totalLength) {
-          clearInterval(interval);
-          setMessages(draft => {
-            draft[draft.length - 1].loading = false;
-          });
-        }
-      }, 20);  // Adjust the interval to control the speed of the "stream"
-
+      streamAnswer(answer);
 
     } catch (err) {
       console.log(err);
