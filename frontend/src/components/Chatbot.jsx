@@ -1,15 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useImmer } from 'use-immer';
 import api from '@/api';
 import ChatMessages from '@/components/ChatMessages';
 import ChatInput from '@/components/ChatInput';
+import downArrowIcon from '@/assets/images/icons8-arrow-down-24.png';
+import useAutoScroll from '@/hooks/useAutoScroll';
 
-function Chatbot() {
-  const [chatId, setChatId] = useState(null);
-  const [messages, setMessages] = useImmer([]);
+function Chatbot({ chatId, setChatId, messages, setMessages, startNewChat }) {
   const [newMessage, setNewMessage] = useState('');
   const [isPageVisible, setIsPageVisible] = useState(true);
-
+  const messagesEndRef = useRef(null);
+  const [showButton, setShowButton] = useState(false);
+  const scrollContentRef = useAutoScroll();
   const isLoading = messages.length && messages[messages.length - 1].loading;
 
   useEffect(() => {
@@ -24,9 +26,29 @@ function Chatbot() {
     };
   }, []);
 
+  useEffect(() => {
+    const savedChatId = sessionStorage.getItem('chatId');
+    const savedMessages = sessionStorage.getItem('messages');
+
+    if (savedChatId) {
+      setChatId(savedChatId);
+    }
+
+    if (savedMessages) {
+      const parsedMessages = JSON.parse(savedMessages);
+      setMessages(parsedMessages);
+    }
+  }, [setChatId, setMessages]);
+
+  useEffect(() => {
+    if (messages.length) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
+
   function streamAnswer(answer) {
     const worker = new Worker(new URL('../streamWorker.js', import.meta.url));
-    const chunkSize = 1; // Adjust as needed
+    const chunkSize = 5;
 
     worker.postMessage({ answer, chunkSize });
 
@@ -36,25 +58,41 @@ function Chatbot() {
       if (!done) {
         setMessages(draft => {
           draft[draft.length - 1].content += chunk;
+          sessionStorage.setItem('messages', JSON.stringify(draft));
         });
       } else {
         setMessages(draft => {
           draft[draft.length - 1].loading = false;
+          sessionStorage.setItem('messages', JSON.stringify(draft));
         });
         worker.terminate();
       }
     };
   }
 
-  async function submitNewMessage() {
-    const trimmedMessage = newMessage.trim();
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const isOverflowing = () => {
+  const { scrollHeight, clientHeight, scrollTop } = scrollContentRef.current;
+  return scrollHeight > clientHeight && scrollTop + clientHeight < scrollHeight;
+};
+
+
+  async function submitNewMessage(message = newMessage) {
+    const trimmedMessage = message.trim();
     if (!trimmedMessage || isLoading) return;
 
-    setMessages(draft => [
-      ...draft,
-      { role: 'user', content: trimmedMessage },
-      { role: 'assistant', content: '', sources: [], loading: true }
-    ]);
+    setMessages(draft => {
+      const updatedMessages = [
+        ...draft,
+        { role: 'user', content: trimmedMessage },
+        { role: 'assistant', content: '', sources: [], loading: true }
+      ];
+      sessionStorage.setItem('messages', JSON.stringify(updatedMessages));
+      return updatedMessages;
+    });
     setNewMessage('');
 
     let chatIdOrNew = chatId;
@@ -66,13 +104,9 @@ function Chatbot() {
       }
 
       const stream = await api.sendChatMessage(chatIdOrNew, trimmedMessage);
-      console.log(stream);
-
       const answer = stream.answer;
-      console.log(answer);
 
       streamAnswer(answer);
-
     } catch (err) {
       console.log(err);
       setMessages(draft => {
@@ -83,7 +117,11 @@ function Chatbot() {
   }
 
   return (
-    <div className='relative grow flex flex-col gap-6 pt-6'>
+    <div 
+      className='relative grow flex flex-col gap-6 pt-6'
+      onMouseEnter={() => setShowButton(true)} 
+      onMouseLeave={() => setShowButton(false)} 
+    >
       {messages.length === 0 && (
         <div className='mt-3 font-urbanist text-primary-blue text-xl font-light space-y-2'>
           <p>👋 Welcome!</p>
@@ -91,10 +129,18 @@ function Chatbot() {
           <p>Ask me anything about this topic and I will tell you the answer.</p>
         </div>
       )}
-      <ChatMessages
-        messages={messages}
-        isLoading={isLoading}
-      />
+      <div ref={scrollContentRef} className='flex-grow overflow-y-auto max-h-[calc(100vh-200px)] hide-scrollbar'>
+        <ChatMessages messages={messages} isLoading={isLoading} />
+        <div ref={messagesEndRef} />
+      </div>
+      {showButton && isOverflowing() && (
+        <button 
+          onClick={scrollToBottom} 
+          className='absolute left-1/2 bottom-16 transform -translate-x-1/2 p-1 bg-primary-blue rounded transition-opacity duration-300 mb-4'
+        >
+          <img src={downArrowIcon} alt='Jump to Down' className='h-4 w-4' />
+        </button>
+      )}
       <ChatInput
         newMessage={newMessage}
         isLoading={isLoading}

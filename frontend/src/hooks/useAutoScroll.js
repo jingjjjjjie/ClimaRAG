@@ -9,9 +9,9 @@ function useAutoScroll(active) {
 
   useEffect(() => {
     const resizeObserver = new ResizeObserver(() => {
-      const { scrollHeight, clientHeight, scrollTop } = document.documentElement;
+      const { scrollHeight, clientHeight, scrollTop } = scrollContentRef.current;
       if (!isDisabled.current && scrollHeight - clientHeight > scrollTop) {
-        document.documentElement.scrollTo({
+        scrollContentRef.current.scrollTo({
           top: scrollHeight - clientHeight,
           behavior: 'smooth'
         });
@@ -32,10 +32,10 @@ function useAutoScroll(active) {
     }
 
     function onScroll() {
-      const { scrollHeight, clientHeight, scrollTop } = document.documentElement;
+      const { scrollHeight, clientHeight, scrollTop } = scrollContentRef.current;
       if (
         !isDisabled.current &&
-        window.scrollY < prevScrollTop.current &&
+        scrollTop < prevScrollTop.current &&
         scrollHeight - clientHeight > scrollTop + SCROLL_THRESHOLD
       ) {
         isDisabled.current = true;
@@ -45,14 +45,14 @@ function useAutoScroll(active) {
       ) {
         isDisabled.current = false;
       }
-      prevScrollTop.current = window.scrollY;
+      prevScrollTop.current = scrollTop;  // Update scrollTop for the container
     }
     
     isDisabled.current = false;
-    prevScrollTop.current = document.documentElement.scrollTop;
-    window.addEventListener('scroll', onScroll);
+    prevScrollTop.current = scrollContentRef.current.scrollTop;
+    scrollContentRef.current.addEventListener('scroll', onScroll);
 
-    return () => window.removeEventListener('scroll', onScroll);
+    return () => scrollContentRef.current.removeEventListener('scroll', onScroll);
   }, [active]);
 
   return scrollContentRef;
