@@ -21,7 +21,8 @@ git clone [仓库地址]
 
 2. 安装后端依赖：
 ```bash
-cd src
+cd RagSummarizer
+# 建议使用虚拟环境 e.g. conda create -n rag python=3.9 && conda activate rag
 pip install -r requirements.txt
 ```
 
@@ -58,7 +59,8 @@ npm install
 ```bash
 cd src
 cp .env.example .env
-# 编辑 .env 文件，填入必要的 API 密钥
+# 复制 .env.example 文件，重命名为 .env 文件
+# 编辑 .env 文件，填入必要的 API 密钥、代理地址（如有需要）等
 ```
 
 2. 启动服务：
@@ -79,6 +81,12 @@ npm run dev
 http://localhost:3000/
 ```
 
+### 补充说明：VPN代理
+
+- 如果您的网络环境需要使用VPN代理，请根据实际情况修改`.env`文件中的`HTTP_PROXY`和`HTTPS_PROXY`环境变量。
+- 如果您的网络环境不需要使用VPN代理，请将`HTTP_PROXY`和`HTTPS_PROXY`设置为空。
+- 如果您没有VPN，请将`WEB_SEARCH_ENABLED`设置为`false`，您将不能使用Google搜索，但可以继续使用离线RAG。
+
 ## 项目参数设置
 
 可在`src/configs/settings.py`和`src/configs/prompt_settings.py`中进行设置。
@@ -96,13 +104,14 @@ src/
 ├── custom_classes/             # 自定义大模型类
 ├── utils/                      # 通用工具
 ├── data/                       # 数据源文件，初次运行时会将其编码为嵌入向量，存入向量数据库
-├── tests/                      # 测试文件
+├── tests/                      # 测试文件（用于开发，请勿使用）
 ├── chroma_db/                  # 向量数据库存储
 ├── app.py                      # FastAPI 应用入口
-├── main.py                     # 测试主程序入口
-├── requirements.txt            # 项目依赖
-├── setup.py                    # 安装配置
+├── main.py                     # 测试主程序入口（用于开发，请勿使用）
 └── .env.example                # 环境变量示例
+setup.py                    # 安装配置：用于pip install .
+pyproject.toml              # 安装配置：用于pip install -e .
+requirements.txt            # 项目依赖：用于pip install -r requirements.txt
 ```
 
 ## 开发状态
@@ -110,10 +119,6 @@ src/
 当前版本：0.1.0 (Alpha)
 
 项目处于积极开发阶段，API 可能会有变动。
-
-## 许可证
-
-MIT License
 
 ## 贡献指南
 

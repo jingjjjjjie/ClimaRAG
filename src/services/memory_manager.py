@@ -1,4 +1,5 @@
 import logging
+import traceback
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import START, MessagesState, StateGraph
 from langchain_core.messages import AIMessage
@@ -37,29 +38,10 @@ class RAGMemoryManager:
             print("---answer--- in process_with_memory")
             print(answer)
             
-            if answer == 'abstract_chain':
-                logger.info("Query routed to abstract chain")
-                docs = self.rag_system.abstract_retriever.invoke(query)
-                response = self.rag_system.abstract_chain.invoke(query)
-                result = {'type': 'abstract', 'docs': docs, 'response': response}
-            
-            elif answer == 'content_chain':
-                logger.info("Query routed to content chain")
-                docs = self.rag_system.content_retriever.invoke(query)
-                response = self.rag_system.content_chain.invoke(query)
-                result = {'type': 'content', 'docs': docs, 'response': response}
-            
-            else:
-                logger.info("Query could not be routed")
-                result = {'type': 'other', 'response': answer}
-            
             logger.info("Query processed through RAG system")
-
-            print("---result--- in process_with_memory")
-            print(result)
             
             # Create an AI message with just the response
-            ai_message = AIMessage(content=result['response'])
+            ai_message = AIMessage(content=answer)
 
             print("---ai_message--- in process_with_memory")
             print(ai_message)
@@ -111,4 +93,5 @@ class RAGMemoryManager:
                 
         except Exception as e:
             logger.error(f"Error processing query with memory: {str(e)}")
+            traceback.print_exc()
             raise

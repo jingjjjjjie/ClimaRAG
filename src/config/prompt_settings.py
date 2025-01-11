@@ -1,9 +1,9 @@
 # Data source descriptions
-ABSTRACT_STORE_DESC = """Abstract_Store is a Database of climate & environmental research abstracts"""
+ABSTRACT_STORE_DESC = """Abstract_Store is a Database of climate & environmental research abstracts, including topics related to causes and impacts of climate change, climate anxiety and human activities on the environment."""
 
-CONTENT_STORE_DESC = """Content_Store is a Database of climate & environmental research full-texts"""
+CONTENT_STORE_DESC = """Content_Store is a Database of climate & environmental research full-texts, including topics related to causes and impacts of climate change, climate anxiety and human activities on the environment."""
 
-ROUTING_DESCRIPTION = f"""Given {ABSTRACT_STORE_DESC} and {CONTENT_STORE_DESC}:
+ROUTING_DESCRIPTION = f"""Given that {ABSTRACT_STORE_DESC} and {CONTENT_STORE_DESC}:
  Return 'Abstract_Store' for summaries and general queries
  Return 'Content_Store' for specific content/concept details
  Return 'OTHER' for unrelated or invalid queries"""
@@ -17,9 +17,9 @@ Conversation History:
 {messages}
 """
 
-EVALUATION_DESCRIPTION = f"""Check if the queries is a evaluation process, it is mentioned in the query with [This is a evaluation process]
-Return True if the queries mentioned that it a evaluation process 
-Return False if it did not mentioned"""
+EVALUATION_DESCRIPTION = f"""Check if the query is a evaluation process, it is mentioned in the query with [This is a evaluation process]
+Return True if the query mentioned that it is a evaluation process 
+Return False if it did not mention"""
 
 
 
@@ -28,7 +28,8 @@ RAG_FUSION_QUERY_TEMPLATE = """Generate 4 progressive search queries for {questi
 . Basic concept/overview
 . Key components/factors
 . Detailed analysis/process
-. Advanced implications/applications"""
+. Advanced implications/applications
+Response (4 queries): """
 
 
 # RAG prompts
@@ -39,7 +40,7 @@ Chat History:
 {question}
 Requirements:
  Use numbered citations [1]
- Include references in APA reference style, attach a clickable link to the source link, Example: [1] Author. (Year). _Source Title._ [https://www.example.com](https://www.example.com)
+ Include references list at the end in APA REFERENCE STYLE, attach a clickable link to the source in the reference list.
  Format in markdown
  Focus on relevant information only"""
 
