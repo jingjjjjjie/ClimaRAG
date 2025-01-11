@@ -8,6 +8,8 @@ from langchain_core.messages import AIMessage
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+from ..config.settings import MEMORY_LIMIT
+
 class RAGMemoryManager:
     def __init__(self, rag_system):
         logger.info("Initializing RAGMemoryManager")
@@ -22,7 +24,17 @@ class RAGMemoryManager:
         # Define the function that processes queries with memory
         def process_with_memory(state: MessagesState):
             logger.info("Processing query with memory")
-            messages = state["messages"]
+            # messages = state["messages"]
+            
+            # Limit to the last k messages
+            messages = []
+            for m in state["messages"][::-1]:
+                messages.append(m)
+                if len(messages) >= MEMORY_LIMIT:
+                    if messages[-1].type != "tool":
+                        break
+                    
+            messages = messages[::-1]
 
             print("---messages--- in process_with_memory")
             print(messages)

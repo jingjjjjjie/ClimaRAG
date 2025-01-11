@@ -12,6 +12,9 @@ RAG-Summarizer 是一个检索增强生成系统，能够根据用户的检索�
 
 - Python >= 3.8 （建议Python 3.9，当前的`requirements.txt`和`setup.py`已在Python 3.9上进行测试）
 
+## VPN要求
+- 由于本RAG系统需要连接Huggingface下载模型，也涉及OpenAI API、Google网络检索API等，请在打开VPN后使用。
+
 ## 安装方法
 
 1. 克隆仓库：
@@ -81,15 +84,33 @@ npm run dev
 http://localhost:3000/
 ```
 
-### 补充说明：VPN代理
-
-- 如果您的网络环境需要使用VPN代理，请根据实际情况修改`.env`文件中的`HTTP_PROXY`和`HTTPS_PROXY`环境变量。
-- 如果您的网络环境不需要使用VPN代理，请将`HTTP_PROXY`和`HTTPS_PROXY`设置为空。
-- 如果您没有VPN，请将`WEB_SEARCH_ENABLED`设置为`false`，您将不能使用Google搜索，但可以继续使用离线RAG。
 
 ## 项目参数设置
 
 可在`src/configs/settings.py`和`src/configs/prompt_settings.py`中进行设置。
+
+
+## FAQ
+
+1. 运行这个项目需要VPN吗？
+
+- 需要。用于连接HuggingFace、OpenAI API、Google Search API。
+
+2. 什么时候需要修改`.env`文件里的 `HTTP_PROXY`和`HTTPS_PROXY`？
+
+- 如果您的VPN环境需要使用代理，请根据实际情况修改`.env`文件中的`HTTP_PROXY`和`HTTPS_PROXY`环境变量。
+- 如果您的VPN环境不需要使用代理，请将`HTTP_PROXY`和`HTTPS_PROXY`设置为空。
+
+3. 调用这个项目的API时，我遇到了"Remote Error"，这是什么意思？
+
+- 若在调用API过程中遇到"Remote Error"类问题，这表示您的VPN网络不稳定，请检查您的VPN，或使用其他VPN。
+
+4. 我只想要使用数据库RAG，不想要使用Google网络检索，应该怎么办？
+
+- 如果您不想使用网络检索，请将`.env`文件中的`WEB_SEARCH_ENABLED`设置为`false`，您将不能使用Google搜索，但可以继续使用数据库RAG。
+
+
+
 ## 项目结构
 
 ```
@@ -113,6 +134,7 @@ setup.py                    # 安装配置：用于pip install .
 pyproject.toml              # 安装配置：用于pip install -e .
 requirements.txt            # 项目依赖：用于pip install -r requirements.txt
 ```
+
 
 ## 开发状态
 
