@@ -94,7 +94,7 @@ http://localhost:3000/
 
 1. 运行这个项目需要VPN吗？
 
-需要。用于连接HuggingFace、OpenAI API、Google Search API。
+- 需要。用于连接HuggingFace、OpenAI API、Google Search API。
 
 2. 什么时候需要修改`.env`文件里的 `HTTP_PROXY`和`HTTPS_PROXY`？
 
@@ -103,11 +103,11 @@ http://localhost:3000/
 
 3. 调用这个项目的API时，我遇到了"Remote Error"，这是什么意思？
 
-若在调用API过程中遇到"Remote Error"类问题，这表示您的VPN网络不稳定，请检查您的VPN，或使用其他VPN。
+- 若在调用API过程中遇到"Remote Error"类问题，这表示您的VPN网络不稳定，请检查您的VPN，或使用其他VPN。
 
 4. 我只想要使用数据库RAG，不想要使用Google网络检索，应该怎么办？
 
-如果您不想使用网络检索，请将`.env`文件中的`WEB_SEARCH_ENABLED`设置为`false`，您将不能使用Google搜索，但可以继续使用数据库RAG。
+- 如果您不想使用网络检索，请将`.env`文件中的`WEB_SEARCH_ENABLED`设置为`false`，您将不能使用Google搜索，但可以继续使用数据库RAG。
 
 
 
