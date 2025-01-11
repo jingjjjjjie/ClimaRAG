@@ -22,6 +22,8 @@ export default {
         'primary-orange': 'rgb(243, 195, 177)',
         'main-text': 'rgb(0, 43, 49)',
         'error-red': 'rgb(208, 69, 82)',
+        'dark-purple': 'rgb(48, 25, 52)',
+        'light-purple': 'rgb(204,204,255)'
       },
       animation: {
         'spinner': 'spinner 1.5s linear infinite',

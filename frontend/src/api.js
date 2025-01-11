@@ -35,6 +35,42 @@ async function sendChatMessage(chatId, text) {
 }
 
 
+async function getConversationHistory() {
+  const res = await fetch(BASE_URL + `/api/v1/conversations`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' }
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    return Promise.reject({ status: res.status, data });
+  }
+  return data;
+}
+
+async function getMessageHistory(chatId) {
+  const res = await fetch(BASE_URL + `/api/v1/chats/${chatId}/messages`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' }
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    return Promise.reject({ status: res.status, data });
+  }
+  return data;
+}
+
+async function updateChatName(chatId, chatName) {
+  const res = await fetch(BASE_URL + `/api/v1/chats/${chatId}/changename?chat_name=${encodeURIComponent(chatName)}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' }
+  });
+  
+  if (!res.ok) {
+    return Promise.reject({ status: res.status, data: await res.json() });
+  }
+  return await res.json();
+}
+
 export default {
-  createChat, sendChatMessage
+  createChat, sendChatMessage, getConversationHistory, getMessageHistory, updateChatName
 };
