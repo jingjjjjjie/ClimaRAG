@@ -85,6 +85,11 @@ http://localhost:3000/
 ```
 
 
+## 项目参数设置
+
+可在`src/configs/settings.py`和`src/configs/prompt_settings.py`中进行设置。
+
+
 ## FAQ
 
 1. 运行这个项目需要VPN吗？
@@ -106,9 +111,6 @@ http://localhost:3000/
 
 
 
-## 项目参数设置
-
-可在`src/configs/settings.py`和`src/configs/prompt_settings.py`中进行设置。
 ## 项目结构
 
 ```
