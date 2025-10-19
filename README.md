@@ -13,7 +13,7 @@ RAG-Summarizer 是一个检索增强生成系统，能够根据用户的检索�
 - Python >= 3.9 （建议Python 3.9，当前的`requirements.txt`和`setup.py`已在Python 3.9上进行测试）
 
 ## VPN要求
-- 由于本RAG系统需要连接Huggingface下载模型，也涉及OpenAI API、Google网络检索API等，请在打开VPN后使用。
+- 由于本RAG系统需要连接Huggingface下载模型，也涉及OpenAI API、Google网络检索API等，在中国境内需要配合VPN使用。
 
 ## 安装方法
 
