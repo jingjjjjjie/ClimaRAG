@@ -193,6 +193,7 @@ requirements.txt                # Dependency list (for pip install -r requiremen
 
 **Current Version:** `0.1.0 (Alpha)`
 
+- last maintained on **20 Dec 2025**
 - The project is under **active development**.  
 - **API interfaces may change** in future updates.
 
