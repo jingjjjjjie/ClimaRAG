@@ -15,6 +15,11 @@ If the query goes beyond the database’s coverage, the system automatically inv
 
 ---
 
+## 📁 Data
+
+For detailed information about the dataset and processing workflow, see the  
+👉 [Full Data Description](assets/docs/data_description.md)
+
 ## ⚙️ System Requirements
 
 - **Python ≥ 3.9** (Python 3.9 recommended; `requirements.txt` and `setup.py` tested on 3.9)
