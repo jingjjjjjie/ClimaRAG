@@ -150,7 +150,7 @@ def preprocess_and_store_data(data_path: str, persist_directory: str = PERSIST_D
         
         # Load corpus from file
         corpus = load_corpus(data_path)
-        print("corpus loaded")
+        
         # Process and store documents
         abstract_docs, content_splits = processor.process_documents(corpus)
         
