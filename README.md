@@ -1,154 +1,226 @@
-# RAG-Summarizer
+# ClimaRAG
 
-基于检索增强生成（RAG）的问答系统
+*A Retrieval-Augmented Generation (RAG) based Question-Answering System*  
+[🇨🇳 中文版 (Chinese Version)](README_CN.md)
 
-![完整流程图](assets/Pipeline.png)
+![Pipeline Overview](assets/Pipeline.png)
 
-## 项目简介
+---
 
-RAG-Summarizer 是一个检索增强生成系统，能够根据用户的检索请求，从向量数据库中检索相关文档，并生成总结或回答。若遇到超出数据库范围的问题，则调用谷歌搜索结合大模型进行回答。
+## 🧠 Project Overview
 
-## 系统要求
+**ClimaRAG** is a retrieval-augmented generation (RAG) system.  
+It retrieves relevant documents from a vector database based on a user's query and generates concise summaries or answers.  
+If the query goes beyond the database’s coverage, the system automatically invokes **Google Search** and combines the results with a **large language model (LLM)** to generate an answer.
 
-- Python >= 3.9 （建议Python 3.9，当前的`requirements.txt`和`setup.py`已在Python 3.9上进行测试） 
-- 需要安装[Node.js](https://nodejs.org/en/download)
+---
 
-## VPN要求
-- 由于本RAG系统需要连接Huggingface下载模型，也涉及OpenAI API、Google网络检索API等，在中国境内需要配合VPN使用。
+## ⚙️ System Requirements
 
-## 安装方法
+- **Python ≥ 3.9** (Python 3.9 recommended; `requirements.txt` and `setup.py` tested on 3.9)
+- **Node.js** (required for the frontend)
+- **VPN access** required in some regions
 
-1. 克隆仓库：
+### 🌐 VPN Requirement
+
+This RAG system connects to:
+- **Hugging Face** (for downloading models)
+- **OpenAI API**
+- **Google Search API**
+
+If you are located in mainland China, a **VPN** is required.
+
+---
+
+## 🚀 Installation
+
+### 1️⃣ Clone the repository
+
 ```bash
-git clone [仓库地址]
+git clone [repository URL]
 ```
 
-2. 安装后端依赖：
+### 2️⃣ Install backend dependencies
+
 ```bash
 cd RagSummarizer
-# 建议使用虚拟环境 e.g. conda create -n rag python=3.9 && conda activate rag
+# Recommended: use a virtual environment
+# Example: conda create -n rag python=3.9 && conda activate rag
 pip install -r requirements.txt
 ```
 
-或者直接通过 setup.py 安装：
+Or install directly via `setup.py`:
+
 ```bash
-pip install . # OR
-pip install -e . # 如果需要开发
+pip install .          # Standard install
+# OR
+pip install -e .       # Editable install (for development)
 ```
 
-3. 安装前端依赖：
+### 3️⃣ Install frontend dependencies
+
 ```bash
 cd frontend
 npm install
 ```
 
-## 主要依赖
+---
 
-- FastAPI - Web 框架
-- LangChain - RAG 系统核心
-- LangGraph - 对话记忆管理
-- ChromaDB - 向量数据库
-- Sentence-Transformers - 文本嵌入
-- 其他重要组件：
-  - langchain-chroma
-  - langchain-community
-  - langchain-core
-  - langchain-huggingface
-  - python-dotenv（环境配置）
-  - uvicorn（ASGI 服务器）
+## 🧩 Core Dependencies
 
-## 使用方法
+- **FastAPI** — Web framework  
+- **LangChain** — Core RAG framework  
+- **LangGraph** — Conversation memory management  
+- **ChromaDB** — Vector database  
+- **Sentence-Transformers** — Text embeddings  
 
-1. 配置环境变量：
+**Additional components:**
+- `langchain-chroma`
+- `langchain-community`
+- `langchain-core`
+- `langchain-huggingface`
+- `python-dotenv` — Environment configuration  
+- `uvicorn` — ASGI server  
+
+---
+
+## 🛠️ Usage
+
+### 1️⃣ Configure environment variables
+
 ```bash
 cd src
 cp .env.example .env
-# 复制 .env.example 文件，重命名为 .env 文件
-# 编辑 .env 文件，填入必要的 API 密钥、代理地址（如有需要）等
+# Rename .env.example to .env
+# Then edit the .env file to include your API keys and proxy (if needed)
 ```
 
-2. 启动服务：
+### 2️⃣ Start the backend service
+
 ```bash
-# 在RagSummarizer目录下
+# From the RagSummarizer root directory
 python -m src.app
 ```
 
-3. 启动前端：
+### 3️⃣ Start the frontend
+
 ```bash
 cd frontend
 npm run dev
 ```
 
-4. 访问前端：
-```bash
-# 默认端口为3000
-http://localhost:3000/
+### 4️⃣ Access the frontend
+
+Open in your browser:  
+👉 [http://localhost:3000/](http://localhost:3000/) (default port 3000)
+
+---
+
+## ⚙️ Configuration
+
+You can modify system and prompt settings in:
+
+- `src/configs/settings.py`
+- `src/configs/prompt_settings.py`
+
+---
+
+## ❓ FAQ
+
+### 1. Do I need a VPN to run this project?
+
+Yes.  
+A VPN is required to access **Hugging Face**, **OpenAI API**, and **Google Search API**.
+
+---
+
+### 2. When should I modify `HTTP_PROXY` and `HTTPS_PROXY` in the `.env` file?
+
+- If your VPN setup **requires a proxy**, update `HTTP_PROXY` and `HTTPS_PROXY` accordingly.  
+- If your VPN **does not** require a proxy, leave them **empty**.
+
+---
+
+### 3. I encountered a "Remote Error" when calling the API. What does this mean?
+
+This typically indicates an **unstable VPN connection**.  
+Please check your VPN connection or try another VPN provider.
+
+---
+
+### 4. I only want to use the database RAG and not Google Search. What should I do?
+
+Set the following in your `.env` file:
 ```
+WEB_SEARCH_ENABLED=false
+```
+This disables Google Search and keeps the local database RAG active.
 
+---
 
-## 项目参数设置
-
-可在`src/configs/settings.py`和`src/configs/prompt_settings.py`中进行设置。
-
-
-## FAQ
-
-1. 运行这个项目需要VPN吗？
-
-- 需要。用于连接HuggingFace、OpenAI API、Google Search API。
-
-2. 什么时候需要修改`.env`文件里的 `HTTP_PROXY`和`HTTPS_PROXY`？
-
-- 如果您的VPN环境需要使用代理，请根据实际情况修改`.env`文件中的`HTTP_PROXY`和`HTTPS_PROXY`环境变量。
-- 如果您的VPN环境不需要使用代理，请将`HTTP_PROXY`和`HTTPS_PROXY`设置为空。
-
-3. 调用这个项目的API时，我遇到了"Remote Error"，这是什么意思？
-
-- 若在调用API过程中遇到"Remote Error"类问题，这表示您的VPN网络不稳定，请检查您的VPN，或使用其他VPN。
-
-4. 我只想要使用数据库RAG，不想要使用Google网络检索，应该怎么办？
-
-- 如果您不想使用网络检索，请将`.env`文件中的`WEB_SEARCH_ENABLED`设置为`false`，您将不能使用Google搜索，但可以继续使用数据库RAG。
-
-
-
-## 项目结构
+## 🧱 Project Structure
 
 ```
-python/                         # 开发和测试代码
-frontend/                       # 前端代码
+python/                         # Development and testing scripts
+frontend/                       # Frontend source code
 src/
-├── api/                        # API 接口层
-├── services/                   # 核心服务层
-├── models/                     # 数据模型定义
-├── config/                     # 配置文件
-├── custom_imported_classes/    # 自定义组件，用于重写langchain的类函数
-├── custom_classes/             # 自定义大模型类
-├── utils/                      # 通用工具
-├── data/                       # 数据源文件，初次运行时会将其编码为嵌入向量，存入向量数据库
-├── tests/                      # 测试文件（用于开发，请勿使用）
-├── chroma_db/                  # 向量数据库存储
-├── app.py                      # FastAPI 应用入口
-├── main.py                     # 测试主程序入口（用于开发，请勿使用）
-└── .env.example                # 环境变量示例
-setup.py                    # 安装配置：用于pip install .
-pyproject.toml              # 安装配置：用于pip install -e .
-requirements.txt            # 项目依赖：用于pip install -r requirements.txt
+├── api/                        # API endpoints
+├── services/                   # Core service layer
+├── models/                     # Data models
+├── config/                     # Configuration files
+├── custom_imported_classes/    # Custom LangChain class overrides
+├── custom_classes/             # Custom LLM classes
+├── utils/                      # Utility functions
+├── data/                       # Source documents (converted to vector embeddings on first run)
+├── tests/                      # Tests (for development only)
+├── chroma_db/                  # Vector database storage
+├── app.py                      # FastAPI application entry point
+├── main.py                     # Development entry point (not for production)
+└── .env.example                # Example environment configuration
+setup.py                        # Package setup (for pip install .)
+pyproject.toml                  # Build configuration (for pip install -e .)
+requirements.txt                # Dependency list (for pip install -r requirements.txt)
 ```
 
+---
 
-## 开发状态
+## 🧩 Development Status
 
-当前版本：0.1.0 (Alpha)
+**Current Version:** `0.1.0 (Alpha)`
 
-项目处于积极开发阶段，API 可能会有变动。
+- The project is under **active development**.  
+- **API interfaces may change** in future updates.
 
-## 贡献指南
+---
 
-欢迎提交 Issue 和 Pull Request！
+## 🤝 Contributing
 
-## 注意事项
+Contributions are welcome!  
+Feel free to:
+- Open **Issues** for bugs or feature requests  
+- Submit **Pull Requests** for improvements  
 
-- 本项目仍处于 Alpha 阶段，不建议用于生产环境
-- 使用前请确保已正确配置所有必要的 API 密钥
-- 建议在虚拟环境中运行项目
+---
+
+## ⚠️ Notes
+
+- This project is in **Alpha** — **not recommended for production** use.  
+- Make sure all **API keys** are properly configured before running.  
+- It is **highly recommended** to use a **virtual environment** for installation and development.
+
+---
+
+## 🏷️ License
+
+This project is released under the **MIT License**.  
+See the `LICENSE` file for details.
+
+---
+
+## 📬 Contact
+
+For questions, suggestions, or collaboration opportunities, please open an issue or contact the maintainer.
+
+---
+
+*RAG-Summarizer — Retrieval meets Generation for smarter answers.*
