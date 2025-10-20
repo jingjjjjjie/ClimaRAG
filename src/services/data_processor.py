@@ -8,6 +8,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from uuid import uuid4
 from ..config.settings import EMBEDDING_MODEL, PERSIST_DIRECTORY
 from ..utils.helpers import load_corpus
+from chromadb.utils.batch_utils import create_batches
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -43,6 +44,17 @@ class DataProcessor:
         )
         
         return self.abstract_store, self.content_store
+    
+    def add_documents_in_batches(self, store, documents, ids, batch_size=5000):
+        """
+        Safely add documents to a vector store in multiple batches.
+        Works with LangChain vector stores (Chroma, FAISS, etc.).
+        """
+        for i in range(0, len(documents), batch_size):
+            batch_docs = documents[i:i + batch_size]
+            batch_ids = ids[i:i + batch_size]
+            logging.info(f"Adding batch {i // batch_size + 1} with {len(batch_docs)} documents")
+            store.add_documents(documents=batch_docs, ids=batch_ids)
 
     def process_documents(self, corpus: List[Dict[str, Any]]):
         """Process documents and store them in appropriate vector stores"""
@@ -105,10 +117,10 @@ class DataProcessor:
         self.abstract_store.add_documents(documents=abstract_docs, ids=abstract_uuids)
         
         logger.info(f"Adding {len(content_splits)} chunks to content store")
-        self.content_store.add_documents(documents=content_splits, ids=content_uuids)
+        self.add_documents_in_batches(self.content_store, content_splits, content_uuids)
         
         return abstract_docs, content_splits
-
+    
     def get_store_stats(self):
         """Get statistics about the vector stores"""
         logger.info("Retrieving vector store statistics")
@@ -138,7 +150,7 @@ def preprocess_and_store_data(data_path: str, persist_directory: str = PERSIST_D
         
         # Load corpus from file
         corpus = load_corpus(data_path)
-        
+        print("corpus loaded")
         # Process and store documents
         abstract_docs, content_splits = processor.process_documents(corpus)
         

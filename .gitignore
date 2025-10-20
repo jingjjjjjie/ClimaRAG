@@ -1,6 +1,7 @@
 src/chroma_db/*
 src/chroma_db.zip
 src/chroma_db_nlp.zip
+chatbot.db
 
 # others
 playground/

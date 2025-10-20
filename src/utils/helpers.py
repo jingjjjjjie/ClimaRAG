@@ -3,6 +3,8 @@ import json
 def load_corpus(filepath):
     with open(filepath, "r", encoding='utf-8') as file:
         raw_data = file.read()
+        print(raw_data)
+        print("loading corpus from file...")
     return json.loads(raw_data)
 
 def display_results(result):

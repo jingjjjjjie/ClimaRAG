@@ -1,3 +1,19 @@
+"""
+FastAPI Application Entry Point for the RAG Summarization System
+---------------------------------------------------------------
+
+This module defines the main web application for the Retrieval-Augmented Generation (RAG) system.
+It exposes RESTful API endpoints that handle document retrieval, summarization, and knowledge-based
+question answering.
+
+When the server starts, it initializes the RAG pipeline (vector stores, models, etc.)
+through the `SystemManager` class. The API routes are organized under `/api/v1`.
+
+Typical usage:
+---------------
+$ python -m src.app
+"""
+
 import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
