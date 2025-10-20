@@ -19,7 +19,7 @@ If the query goes beyond the database’s coverage, the system automatically inv
 
 - **Python ≥ 3.9** (Python 3.9 recommended; `requirements.txt` and `setup.py` tested on 3.9)
 - **Node.js** (required for the frontend)
-- **VPN access** required in some regions
+- **VPN access** required in some regions (eg. Mainland China)
 
 ### 🌐 VPN Requirement
 
