@@ -18,6 +18,5 @@ CHUNK_OVERLAP = 100
 MEMORY_LIMIT = 5
 
 # Data Settings
-# DATA_PATH = './src/data/data_info.txt'
 DATA_PATH = './src/data/data.json'
 PERSIST_DIRECTORY = "./src/chroma_db" 
