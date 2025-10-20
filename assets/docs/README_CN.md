@@ -144,6 +144,8 @@ requirements.txt            # 项目依赖：用于pip install -r requirements.t
 
 ## 开发状态
 
+最新维护日期: 2025/10/20
+
 当前版本：0.1.0 (Alpha)
 
 项目处于积极开发阶段，API 可能会有变动。
