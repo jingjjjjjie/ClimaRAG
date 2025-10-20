@@ -9,9 +9,9 @@
 
 ## 🧠 Project Overview
 
-**ClimaRAG** is a retrieval-augmented generation (RAG) system.  
-It retrieves relevant documents from a vector database based on a user's query and generates concise summaries or answers.  
-If the query goes beyond the database’s coverage, the system automatically invokes **Google Search** and combines the results with a **large language model (LLM)** to generate an answer.
+**ClimaRAG** ClimaRAG is a retrieval-augmented generation (RAG) system designed to support academic research on climate change.
+It retrieves relevant documents from a vector database based on user queries and generates concise summaries or analytical answers.
+When a query extends beyond the database’s scope, the system automatically performs a Google Search and integrates the results with a large language model (LLM) to produce a comprehensive response.
 
 ---
 
