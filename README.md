@@ -225,7 +225,7 @@ See the `LICENSE` file for details.
 
 ## 📬 Contact
 
-For questions, suggestions, or collaboration opportunities, please open an issue or contact the maintainer.
+For questions, suggestions, or collaboration opportunities, please open an issue or contact the maintainer @ hengzkit@gmail.com.
 
 ---
 
