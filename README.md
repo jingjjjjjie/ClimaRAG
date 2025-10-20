@@ -1,7 +1,7 @@
 # ClimaRAG
 
 *A Retrieval-Augmented Generation (RAG) based Question-Answering System*  
-[🇨🇳 中文版 (Chinese Version)](README_CN.md)
+[🇨🇳 中文版 (Chinese Version)](assets/docs/README_CN.md)
 
 ![Pipeline Overview](assets/Pipeline.png)
 
