@@ -25,3 +25,7 @@ The data processing pipeline involved two major stages:
 The final dataset was stored in **JSON format**, facilitating vectorization and retrieval tasks in the RAG pipeline.
 
 Out of approximately **600 retrieved papers**, **293 full-text PDFs** were successfully obtained and processed, forming the final corpus used for the retrieval-augmented generation system.
+
+### 🧭 Data Location
+
+The data is locate under src/data, under the name data.json. Do remember to change the data loading path in src/config/settings.py
